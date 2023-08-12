@@ -23,7 +23,7 @@ public class ChatEntity {
     @Enumerated(value = EnumType.STRING)
     private Availability type;
 
-    @OneToMany
+    @OneToMany(fetch = FetchType.LAZY)
     @JoinColumn(name = "chat_id")
     private Set<ParticipantEntity> participants;
 }

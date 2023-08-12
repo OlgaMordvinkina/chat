@@ -9,4 +9,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ParticipantRepository extends JpaRepository<ParticipantEntity, CompositeKey> {
     ParticipantEntity findByKey_Chat_IdAndType(Long chatId, TypeParticipant type);
+
+    void deleteByKey_Chat_IdAndKey_User_Id(Long chatId, Long userId);
 }

@@ -40,4 +40,15 @@ public class MessageEntity {
     @OneToMany
     @Column(name = "attachment_id")
     private List<AttachmentEntity> attachments;
+//    @ManyToMany
+//    @JoinTable(name = "message_participant",
+//            joinColumns = {
+//                    @JoinColumn(name = "message_id", referencedColumnName = "id")
+//            },
+//            inverseJoinColumns = {
+//                    @JoinColumn(name = "chat_id", referencedColumnName = "chat_id"),
+//                    @JoinColumn(name = "user_id", referencedColumnName = "user_id")
+//            }
+//    )
+//    private List<ParticipantEntity> participants;
 }

@@ -5,4 +5,8 @@ import com.example.chat.user.dto.UserRegisterDto;
 
 public interface UserService {
     UserDto createUser(UserRegisterDto newUser);
+
+    UserDto updateUser(Long userId, Long updatedUserId, UserRegisterDto updateUser);
+
+    void deleteUserById(Long userId, Long deletedUserId);
 }

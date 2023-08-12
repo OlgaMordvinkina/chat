@@ -1,5 +1,6 @@
 package com.example.chat.profile.services;
 
+import com.example.chat.exceptions.AccessException;
 import com.example.chat.profile.dto.ProfileDto;
 import com.example.chat.profile.entity.ProfileEntity;
 import com.example.chat.profile.mapper.ProfileMapper;
@@ -27,4 +28,17 @@ public class ProfileServiceImpl implements ProfileService {
         entity.setUser(user);
         return mapper.toProfileDto(repository.save(entity));
     }
+
+//    @Override
+//    public ProfileDto updateProfile() {
+//
+//    }
+
+    private void existRights(Long userId, Long editingUserId) {
+        if (!userId.equals(editingUserId)) {
+            throw new AccessException("No rights to edit this user");
+        }
+    }
+
+
 }
