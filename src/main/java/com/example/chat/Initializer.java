@@ -1,17 +1,13 @@
 package com.example.chat;
 
-import com.example.chat.chat.dto.ChatDto;
-import com.example.chat.chat.enums.Availability;
-import com.example.chat.chat.services.ChatService;
-import com.example.chat.message.controllers.MessageController;
-import com.example.chat.message.dto.MessageDto;
-import com.example.chat.participant.controllers.ParticipantController;
-import com.example.chat.setting.dto.SettingDto;
-import com.example.chat.setting.mapper.SettingMapper;
-import com.example.chat.setting.repositories.SettingRepository;
-import com.example.chat.user.dto.UserDto;
-import com.example.chat.user.dto.UserRegisterDto;
-import com.example.chat.user.services.UserService;
+import com.example.chat.controllers.MessageController;
+import com.example.chat.controllers.ParticipantController;
+import com.example.chat.dto.*;
+import com.example.chat.dto.enums.Availability;
+import com.example.chat.mappers.SettingMapper;
+import com.example.chat.repositories.SettingRepository;
+import com.example.chat.services.ChatService;
+import com.example.chat.services.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

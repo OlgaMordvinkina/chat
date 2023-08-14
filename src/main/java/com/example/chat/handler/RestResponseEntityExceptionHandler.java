@@ -1,8 +1,8 @@
 package com.example.chat.handler;
 
 import com.example.chat.exceptions.AccessException;
+import com.example.chat.exceptions.EmailUniqueException;
 import com.example.chat.exceptions.NotFoundObjectException;
-import com.example.chat.user.exceptions.EmailUniqueException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;

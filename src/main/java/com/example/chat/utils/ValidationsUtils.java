@@ -1,12 +1,12 @@
 package com.example.chat.utils;
 
-import com.example.chat.chat.entity.ChatEntity;
-import com.example.chat.chat.repositories.ChatRepository;
+import com.example.chat.entities.ChatEntity;
+import com.example.chat.entities.MessageEntity;
+import com.example.chat.entities.UserEntity;
 import com.example.chat.exceptions.NotFoundObjectException;
-import com.example.chat.message.entity.MessageEntity;
-import com.example.chat.message.repositories.MessageRepository;
-import com.example.chat.user.entity.UserEntity;
-import com.example.chat.user.repositories.UserRepository;
+import com.example.chat.repositories.ChatRepository;
+import com.example.chat.repositories.MessageRepository;
+import com.example.chat.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -16,28 +16,6 @@ public class ValidationsUtils {
     private final UserRepository userRepository;
     private final ChatRepository chatRepository;
     private final MessageRepository messageRepository;
-
-//    public static <T> void checkExistence(JpaRepository<T, Long> repository, NotFoundObjectException exception, Long id) {
-//        if(!repository.existsById(id)) {
-//            throw exception;
-//        }
-//    }
-//
-//    public void check() {
-//        Long  id = 0L;
-//        Function<Object, Boolean> checkById = __ -> userRepository.existsById(id);
-//
-//        ValidationsUtils.checkExistence(checkById, ...);
-//    }
-//
-//    public static <T> void checkExistence(Function<Object, Boolean> function, NotFoundObjectException exception, Long id) {
-//        boolean result = function.apply(null);
-//
-//        if(!repository.existsById(id)) {
-//            throw exception;
-//        }
-//    }
-
 
     public UserEntity getUserById(Long userId) {
         return userRepository.findById(userId).orElseThrow(() -> new NotFoundObjectException("User with ID=" + userId + " does not exist."));
