@@ -21,7 +21,7 @@ public class MessageEntity {
     private Long id;
     @ManyToOne
     @JoinColumn(name = "sender_id", referencedColumnName = "id")
-    private UserEntity sender;
+    private ProfileEntity sender;
     @ManyToOne
     @JoinColumn(name = "chat_id", referencedColumnName = "id")
     private ChatEntity chat;
@@ -29,11 +29,14 @@ public class MessageEntity {
     private LocalDateTime createDate;
     @Enumerated(value = EnumType.STRING)
     private StateMessage state;
+    @Column(columnDefinition = "TEXT")
     private String text;
-    @Column(name = "reply_message")
-    private String replyMessage;
-    @Column(name = "forward_from")
-    private String forwardFrom;
+    @OneToOne
+    @JoinColumn(name = "reply_message")
+    private MessageEntity replyMessage;
+    @OneToMany
+    @JoinColumn(name = "forward_from")
+    private List<MessageEntity> forwardFrom;
     @OneToMany(fetch = FetchType.LAZY)
     @JoinColumn(name = "id")
     private List<AttachmentEntity> attachments;

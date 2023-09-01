@@ -21,7 +21,6 @@ public class ChatEntity {
     private String title;
     @Enumerated(value = EnumType.STRING)
     private Availability type;
-
     @OneToMany(fetch = FetchType.LAZY)
     @JoinColumn(name = "chat_id")
     private Set<ParticipantEntity> participants;

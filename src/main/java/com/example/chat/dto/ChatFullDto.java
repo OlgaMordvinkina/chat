@@ -6,16 +6,15 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Set;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ChatDto {
+public class ChatFullDto {
     private Long id;
     private String title;
     private Availability type;
-    private Set<Long> participants;
-//    private Set<UserDto> participants;
+    private List<UserFullDto> participants;
 }

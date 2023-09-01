@@ -6,8 +6,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -16,7 +14,8 @@ public class ChatPreviewDto {
     private Long chatId;
     //    private AttachmentDto attachment;
     private String title;
+    private Long senderId;
     private String lastMessage;
-    private LocalDateTime dateLastMessage;
+    private String dateLastMessage;
     private StateMessage stateMessage;
 }

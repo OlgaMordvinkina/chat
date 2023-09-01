@@ -1,14 +1,11 @@
 package com.example.chat.controllers;
 
-import com.example.chat.entities.ParticipantEntity;
+import com.example.chat.dto.UserFullDto;
 import com.example.chat.services.ParticipantService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-import java.util.Set;
 
 @RestController
 @Slf4j
@@ -17,21 +14,30 @@ import java.util.Set;
 public class ParticipantController {
     private final ParticipantService service;
 
+//    @ResponseStatus(HttpStatus.CREATED)
+//    @PostMapping("/participants")
+//    public List<ParticipantEntity> addParticipants(@PathVariable Long userId,
+//                                                   @PathVariable Long chatId,
+//                                                   @RequestBody Set<Long> participantsIds) {
+//        log.info("POST /users/{userId}/chats/{chatId}/participants request received");
+//        return service.addParticipants(userId, chatId, participantsIds);
+//    }
+
     @ResponseStatus(HttpStatus.CREATED)
-    @PostMapping
-    public List<ParticipantEntity> addParticipants(@PathVariable Long userId,
-                                                   @PathVariable Long chatId,
-                                                   Set<Long> participantsIds) {
-        log.info("POST /users/{userId}/chats/{chatId} request received");
-        return service.addParticipants(userId, chatId, participantsIds);
+    @PostMapping("/participant")
+    public UserFullDto addParticipant(@PathVariable Long userId,
+                                      @PathVariable Long chatId,
+                                      @RequestParam Long participantUserId) {
+        log.info("POST /users/{userId}/chats/{chatId}/participants request received");
+        return service.addParticipant(userId, chatId, participantUserId);
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @DeleteMapping
+    @DeleteMapping("/participants/exclude")
     public void deleteParticipantById(@PathVariable Long userId,
                                       @PathVariable Long chatId,
-                                      Long deletedUserId) {
-        log.info("DELETE /users/{userId}/chats/{chatId} request received");
+                                      @RequestParam Long deletedUserId) {
+        log.info("DELETE /users/{userId}/chats/{chatId}/participants/exclude request received");
         service.deleteParticipantById(userId, chatId, deletedUserId);
     }
 }
