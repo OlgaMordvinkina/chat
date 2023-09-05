@@ -4,8 +4,12 @@ import com.example.chat.controllers.ChatController;
 import com.example.chat.controllers.MessageController;
 import com.example.chat.dto.*;
 import com.example.chat.dto.enums.Availability;
+import com.example.chat.dto.enums.Role;
+import com.example.chat.entities.PasswordEntity;
+import com.example.chat.entities.UserEntity;
 import com.example.chat.mappers.SettingMapper;
 import com.example.chat.repositories.SettingRepository;
+import com.example.chat.repositories.UserRepository;
 import com.example.chat.services.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -20,6 +24,7 @@ public class Initializer {
     private final SettingMapper settingMapper;
     private final ChatController chatController;
     private final MessageController messageController;
+    private final UserRepository userRepository;
 
     private final ChatDto chat1 = new ChatDto(null, null, Availability.PRIVATE, null);
     private final ChatDto chat2 = new ChatDto(null, null, Availability.PRIVATE, null);
@@ -29,7 +34,7 @@ public class Initializer {
     private final UserRegisterDto user1 = new UserRegisterDto("петренко@mail.ru", "12345678", "12345678", "Полина", "Петренко");
     private final UserRegisterDto user2 = new UserRegisterDto("мануйлова@mail.ru", "00000000", "00000000", "Валентина", "Мануйлова");
     private final UserRegisterDto user3 = new UserRegisterDto("кузьмина@mail.ru", "11112222", "11112222", "Екатерина", "Кузьмина");
-    private final UserRegisterDto user4 = new UserRegisterDto("орлова@mail.ru", "admin000", "admin000", "Ольга", "Орлова");
+    private final UserRegisterDto user4 = new UserRegisterDto("admin@mail.ru", "admin000", "admin000", "Ольга", "Орлова");
     private final MessageDto message = new MessageDto();
 
     public void initial() {
@@ -43,6 +48,7 @@ public class Initializer {
         userService.createUser(new UserRegisterDto("Перебейло@mail.ru", "16548951", "16548951", "Марина", "Перебейло"));
         userService.createUser(new UserRegisterDto("Крюковский@mail.ru", "02322548", "02322548", "Даниил", "Крюковский"));
         userService.createUser(new UserRegisterDto("Брошка@mail.ru", "62515881", "62515881", "Рита", "Брошка"));
+        userRepository.save(new UserEntity(null, "admin", new PasswordEntity("admin000"), Role.REGISTERED));
 
         chat1.setParticipants(Set.of(user1.getId()));
         chatController.createChat(4L, chat1);
