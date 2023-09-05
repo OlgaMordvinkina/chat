@@ -19,7 +19,7 @@ public class UserEntity {
     @Column(unique = true)
     private String email;
     @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "password_id", referencedColumnName = "id")
+    @JoinColumn(name = "password_id", referencedColumnName = "id", nullable = false)
     private PasswordEntity password;
     @Enumerated(value = EnumType.STRING)
     private Role role;
