@@ -106,8 +106,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserFullDto getUser(Long userId) {
-        return userMapper.toUserFullDto(profileService.findProfileByUserId(userId));
+    public UserFullDto getUser(String email) {
+        return userMapper.toUserFullDto(profileService.getProfileByEmail(email));
     }
 
     private void existRights(Long userId, Long editingUserId) {

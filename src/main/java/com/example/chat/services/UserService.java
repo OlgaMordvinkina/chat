@@ -20,5 +20,5 @@ public interface UserService {
 
     List<UserFullDto> searchUser(Long userId, String desired);
 
-    UserFullDto getUser(Long userId);
+    UserFullDto getUser(String email);
 }

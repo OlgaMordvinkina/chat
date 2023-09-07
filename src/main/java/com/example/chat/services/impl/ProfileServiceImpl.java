@@ -45,6 +45,15 @@ public class ProfileServiceImpl implements ProfileService {
         return profileMapper.toProfileDto(findProfileByUserId(userId));
     }
 
+    @Override
+    public ProfileEntity getProfileByEmail(String email) {
+        ProfileEntity profile = profileRepository.findByUserEmail(email);
+        if (profile == null) {
+            throw new NotFoundObjectException("Profile with EMAIL=" + email + " does not exist.");
+        }
+        return profile;
+    }
+
     @Transactional(readOnly = true)
     @Override
     public ProfileEntity findProfileByUserId(Long userId) {

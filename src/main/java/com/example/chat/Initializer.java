@@ -4,9 +4,6 @@ import com.example.chat.controllers.ChatController;
 import com.example.chat.controllers.MessageController;
 import com.example.chat.dto.*;
 import com.example.chat.dto.enums.Availability;
-import com.example.chat.dto.enums.Role;
-import com.example.chat.entities.PasswordEntity;
-import com.example.chat.entities.UserEntity;
 import com.example.chat.mappers.SettingMapper;
 import com.example.chat.repositories.SettingRepository;
 import com.example.chat.repositories.UserRepository;
@@ -48,7 +45,7 @@ public class Initializer {
         userService.createUser(new UserRegisterDto("Перебейло@mail.ru", "16548951", "16548951", "Марина", "Перебейло"));
         userService.createUser(new UserRegisterDto("Крюковский@mail.ru", "02322548", "02322548", "Даниил", "Крюковский"));
         userService.createUser(new UserRegisterDto("Брошка@mail.ru", "62515881", "62515881", "Рита", "Брошка"));
-        userRepository.save(new UserEntity(null, "admin", new PasswordEntity("admin000"), Role.REGISTERED));
+//        userRepository.save(new UserEntity(null, "admin", new PasswordEntity("00000000"), Role.REGISTERED));
 
         chat1.setParticipants(Set.of(user1.getId()));
         chatController.createChat(4L, chat1);

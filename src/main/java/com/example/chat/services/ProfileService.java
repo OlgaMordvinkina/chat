@@ -13,4 +13,6 @@ public interface ProfileService {
     ProfileEntity findProfileByUserId(Long userId);
 
     ProfileDto getProfileByUserId(Long userId);
+
+    ProfileEntity getProfileByEmail(String email);
 }
