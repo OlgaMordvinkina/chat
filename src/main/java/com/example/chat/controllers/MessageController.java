@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,6 +27,7 @@ import java.util.List;
 @RequestMapping("/users/{userId}/chats")
 public class MessageController {
     private final MessageService service;
+    private final SimpMessagingTemplate messagingTemplate;
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping(value = "/{chatId}/messages", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
@@ -39,7 +41,24 @@ public class MessageController {
         ChatDto chatDto = new ChatDto();
         chatDto.setId(chatId);
         newMessage.setChat(chatDto);
-        return service.createMessage(newMessage);
+
+        MessageDto createdMessage = service.createMessage(newMessage);
+// Отправка сообщения получателю через WebSocket
+//        Set<Long> participants = createdMessage.getChat().getParticipants();
+//        webSocketHandler.sendMessageToParticipant(participants.stream().findFirst().get(), createdMessage);
+//        messagingTemplate.convertAndSend("/chat/" + chatId, newMessage);
+//        messagingTemplate.convertAndSend("/api/chat", newMessage);
+        if(newMessage.getChat().getParticipants() != null) {
+            newMessage.getChat().getParticipants().forEach(it ->
+                    messagingTemplate.convertAndSendToUser(
+                            it.toString(),
+                            "/messages",
+                            newMessage
+                    )
+            );
+        }
+
+        return createdMessage;
     }
 
     @PutMapping("/{chatId}/messages")
@@ -96,14 +115,4 @@ public class MessageController {
         log.debug("GET /users/{userId}/chats/{chatId}/messages/search request received");
         return service.searchMessagesChats(userId, chatId, desired, TypeSearch.THIS_CHAT);
     }
-
-//TODO: добавить секьюрити
-//@GetMapping("/{chatId}/messages")
-//public List<MessageDto> getMessages(@PathVariable Long userId,
-//                                    @PathVariable Long chatId,
-//                                    Principal user
-//) {
-//    log.debug("GET /users/{userId}/chats/{chatId}/messages request received");
-//    return service.getMessages(userId, chatId);
-//}
 }
