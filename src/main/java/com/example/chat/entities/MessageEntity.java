@@ -31,13 +31,13 @@ public class MessageEntity {
     private StateMessage state;
     @Column(columnDefinition = "TEXT")
     private String text;
-    @OneToOne
-    @JoinColumn(name = "reply_message")
+    @ManyToOne
+    @JoinColumn(name = "reply_message", unique = false)
     private MessageEntity replyMessage;
     @OneToMany
     @JoinColumn(name = "forward_from")
     private List<MessageEntity> forwardFrom;
     @OneToMany(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id")
+    @JoinColumn(name = "attachment_id", referencedColumnName = "id")
     private List<AttachmentEntity> attachments;
 }

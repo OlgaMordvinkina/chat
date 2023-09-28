@@ -15,7 +15,7 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
     @Query("SELECT EXISTS(SELECT 1 FROM UserEntity WHERE email = :email)")
     boolean findByEmail(String email);
 
-    @Query("SELECT DISTINCT (u.id), p.surname, p.name, u.email " +
+    @Query("SELECT DISTINCT (u.id), p.surname, p.name, u.email, p.photo " +
             "FROM UserEntity u " +
             "JOIN ProfileEntity p ON p.user.id=u.id " +
             "WHERE u.id!=:userId " +

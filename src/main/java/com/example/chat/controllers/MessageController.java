@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,7 +19,9 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 import java.util.List;
+import java.util.Objects;
 
+@SuppressWarnings("checkstyle:Regexp")
 @Slf4j
 @Validated
 @RestController
@@ -26,6 +29,7 @@ import java.util.List;
 @RequestMapping("/users/{userId}/chats")
 public class MessageController {
     private final MessageService service;
+    private final SimpMessagingTemplate messagingTemplate;
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping(value = "/{chatId}/messages", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
@@ -33,13 +37,11 @@ public class MessageController {
                                     @PathVariable Long chatId,
                                     @RequestBody MessageDto newMessage) {
         log.info("POST /users/{userId}/chats/{chatId}/messages request received");
-        ProfileDto profileDto = new ProfileDto();
-        profileDto.setUserId(userId);
-        newMessage.setSender(profileDto);
-        ChatDto chatDto = new ChatDto();
-        chatDto.setId(chatId);
-        newMessage.setChat(chatDto);
-        return service.createMessage(newMessage);
+        MessageDto createdMessage = service.createMessage(userId, chatId, newMessage);
+
+        sendToWebsocket(createdMessage, "CREATE");
+
+        return createdMessage;
     }
 
     @PutMapping("/{chatId}/messages")
@@ -53,7 +55,19 @@ public class MessageController {
         ChatDto chatDto = new ChatDto();
         chatDto.setId(chatId);
         newMessage.setChat(chatDto);
-        return service.updateMessage(newMessage);
+        MessageDto updatedMessage = service.updateMessage(newMessage);
+        sendToWebsocket(updatedMessage, "UPDATE");
+
+        return updatedMessage;
+    }
+
+    @PutMapping("/{chatId}/messages/state")
+    public void updateStateMessage(@PathVariable Long userId,
+                                   @PathVariable Long chatId) {
+        log.info("PUT /users/{userId}/chats/{chatId}/messages/state request received");
+
+        service.updateStateMessages(userId, chatId);
+        sendToWebsocket(chatId);
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
@@ -62,7 +76,8 @@ public class MessageController {
                               @PathVariable Long chatId,
                               @PathVariable Long messageId) {
         log.info("DELETE /users/{userId}/chats/{chatId}/messages/{messageId} request received");
-        service.deleteMessage(userId, chatId, messageId);
+        MessageDto message = service.deleteMessage(userId, chatId, messageId);
+        sendToWebsocket(message, "DELETE");
     }
 
     @GetMapping("/{chatId}/messages")
@@ -97,13 +112,31 @@ public class MessageController {
         return service.searchMessagesChats(userId, chatId, desired, TypeSearch.THIS_CHAT);
     }
 
-//TODO: добавить секьюрити
-//@GetMapping("/{chatId}/messages")
-//public List<MessageDto> getMessages(@PathVariable Long userId,
-//                                    @PathVariable Long chatId,
-//                                    Principal user
-//) {
-//    log.debug("GET /users/{userId}/chats/{chatId}/messages request received");
-//    return service.getMessages(userId, chatId);
-//}
+    private void sendToWebsocket(MessageDto message, String type) {
+        if (message.getChat().getParticipants() != null) {
+            message.getChat().getParticipants().stream()
+                    .filter(it -> !Objects.equals(it, message.getSender().getId()))
+                    .forEach(it -> {
+                                message.setTypeMessage(type);
+
+                                messagingTemplate.convertAndSendToUser(
+                                        it.toString(),
+                                        "/messages",
+                                        message
+                                );
+                            }
+                    );
+        }
+    }
+
+    private void sendToWebsocket(Long chatId) {
+        MessageDto lastMessage = service.getLastMessageByChat(chatId);
+        if (lastMessage != null) {
+            messagingTemplate.convertAndSendToUser(
+                    lastMessage.getSender().getUserId().toString(),
+                    "/messages/state",
+                    chatId
+            );
+        }
+    }
 }

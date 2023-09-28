@@ -1,5 +1,6 @@
 package com.example.chat.mappers;
 
+import com.example.chat.dto.AttachmentDto;
 import com.example.chat.dto.MessageDto;
 import com.example.chat.entities.ChatEntity;
 import com.example.chat.entities.MessageEntity;
@@ -15,21 +16,29 @@ import java.util.stream.Collectors;
 
 @Mapper(componentModel = "spring")
 public interface MessageMapper {
-    //    @Mapping(target = "senderId", source = "entity.sender.id")
     @Mapping(target = "sender", source = "entity.sender")
     @Mapping(target = "sender.userId", source = "entity.sender.user.id")
     @Mapping(target = "chat", source = "entity.chat")
-    @Mapping(target = "replyMessageId", source = "entity.replyMessage.id")
-    @Mapping(target = "forwardFromIds", source = "entity.forwardFrom", qualifiedByName = "forwardFromIds")
+    @Mapping(target = "replyMessage", expression = "java(toMessageDto(entity.getReplyMessage(), null))")
+    @Mapping(target = "forwardFrom", source = "entity.forwardFrom", qualifiedByName = "forwardFrom")
     @Mapping(target = "chat.participants", source = "entity.chat.participants", qualifiedByName = "participants")
+    @Mapping(target = "typeMessage", expression = "java(null)")
+    @Mapping(target = "attachments", source = "attachments")
+    MessageDto toMessageDto(MessageEntity entity, List<AttachmentDto> attachments);
+
+    @Mapping(target = "sender", source = "entity.sender")
+    @Mapping(target = "sender.userId", source = "entity.sender.user.id")
+    @Mapping(target = "chat", source = "entity.chat")
+    @Mapping(target = "replyMessage", expression = "java(toMessageDto(entity.getReplyMessage(), null))")
+    @Mapping(target = "forwardFrom", source = "entity.forwardFrom", qualifiedByName = "forwardFrom")
+    @Mapping(target = "chat.participants", source = "entity.chat.participants", qualifiedByName = "participants")
+    @Mapping(target = "typeMessage", expression = "java(null)")
     MessageDto toMessageDto(MessageEntity entity);
 
-    @Named("forwardFromIds")
-    static Set<Long> getForwardFromIds(List<MessageEntity> forwardFrom) {
+    @Named("forwardFrom")
+    default List<MessageDto> getForwardFrom(List<MessageEntity> forwardFrom) {
         return forwardFrom != null
-                ? forwardFrom.stream()
-                .map(MessageEntity::getId)
-                .collect(Collectors.toSet())
+                ? forwardFrom.stream().map(message -> toMessageDto(message, null)).collect(Collectors.toList())
                 : null;
     }
 

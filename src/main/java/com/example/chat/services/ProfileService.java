@@ -6,11 +6,15 @@ import com.example.chat.entities.ProfileEntity;
 import com.example.chat.entities.UserEntity;
 
 public interface ProfileService {
-    ProfileDto createProfile(ProfileDto newProfile, UserEntity user);
+    UserEntity createProfile(ProfileDto newProfile, UserEntity user);
 
     ProfileDto updateProfile(Long userId, UserRegisterDto updateProfile);
 
     ProfileEntity findProfileByUserId(Long userId);
 
     ProfileDto getProfileByUserId(Long userId);
+
+    ProfileEntity getProfileByEmail(String email);
+
+    ProfileDto updateOnlineDate(Long userId);
 }

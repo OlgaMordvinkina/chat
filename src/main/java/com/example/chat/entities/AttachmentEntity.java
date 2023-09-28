@@ -15,6 +15,6 @@ public class AttachmentEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(name = "external_id")
-    private String externalId;
+    @Column(name = "name_file")
+    private String nameFile;
 }

@@ -2,18 +2,24 @@ package com.example.chat.services.impl;
 
 import com.example.chat.dto.ProfileDto;
 import com.example.chat.dto.UserRegisterDto;
+import com.example.chat.dto.enums.TypeBucket;
 import com.example.chat.entities.ProfileEntity;
+import com.example.chat.entities.SettingEntity;
 import com.example.chat.entities.UserEntity;
-import com.example.chat.exceptions.AccessException;
 import com.example.chat.exceptions.NotFoundObjectException;
 import com.example.chat.mappers.ProfileMapper;
+import com.example.chat.mappers.SettingMapper;
 import com.example.chat.repositories.ProfileRepository;
+import com.example.chat.services.MinioService;
 import com.example.chat.services.ProfileService;
 import com.example.chat.services.SettingService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Service
 @Slf4j
@@ -22,27 +28,73 @@ import org.springframework.transaction.annotation.Transactional;
 public class ProfileServiceImpl implements ProfileService {
     private final ProfileRepository profileRepository;
     private final ProfileMapper profileMapper;
+    private final SettingMapper settingMapper;
     private final SettingService settingService;
+    private final MinioService minioService;
 
     @Override
-    public ProfileDto createProfile(ProfileDto newProfile, UserEntity user) {
+    @Transactional
+    public UserEntity createProfile(ProfileDto newProfile, UserEntity user) {
         newProfile.setSetting(settingService.getSettingById(1L));
         ProfileEntity profile = profileMapper.toProfileEntity(newProfile);
         profile.setUser(user);
-        return profileMapper.toProfileDto(profileRepository.save(profile));
+        ProfileEntity entity = profileRepository.save(profile);
+        return entity.getUser();
     }
 
     @Override
     public ProfileDto updateProfile(Long userId, UserRegisterDto updateProfile) {
         ProfileEntity profile = findProfileByUserId(userId);
-        if (updateProfile.getName() != null) profile.setName(updateProfile.getName());
-        if (updateProfile.getSurname() != null) profile.setSurname(updateProfile.getSurname());
+        if (updateProfile.getName() != null && !updateProfile.getName().isBlank())
+            profile.setName(updateProfile.getName());
+        if (updateProfile.getSurname() != null && !updateProfile.getSurname().isBlank())
+            profile.setSurname(updateProfile.getSurname());
+        if (updateProfile.getSettingId() != null) {
+            SettingEntity setting = settingMapper.toSettingEntity(settingService.getSettingById(updateProfile.getSettingId()));
+
+            profile.setSetting(
+                    setting != null ?
+                            setting :
+                            settingService.createSetting(new SettingEntity(updateProfile.getSettingId(), "{sound-" + updateProfile.getSettingId() + "}"))
+            );
+        }
+        if (updateProfile.getPhotoUser() != null) {
+            String namePhoto = minioService.putFile(TypeBucket.user.name() + userId.toString(), updateProfile.getPhotoUser());
+            profile.setPhoto(namePhoto);
+        }
         return profileMapper.toProfileDto(profileRepository.save(profile));
     }
 
     @Override
+    public ProfileDto updateOnlineDate(Long userId) {
+        ProfileEntity profile = findProfileByUserId(userId);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        profile.setOnlineDate(LocalDateTime.parse(LocalDateTime.now().format(formatter), formatter));
+        ProfileDto profileDto = profileMapper.toProfileDto(profileRepository.save(profile));
+        profileDto.setPhoto(getFileBase64(userId, profileDto));
+        return profileDto;
+    }
+
+    @Override
     public ProfileDto getProfileByUserId(Long userId) {
-        return profileMapper.toProfileDto(findProfileByUserId(userId));
+        ProfileDto profileDto = profileMapper.toProfileDto(findProfileByUserId(userId));
+        if (profileDto.getPhoto() != null) {
+            profileDto.setPhoto(getFileBase64(userId, profileDto));
+        }
+        return profileDto;
+    }
+
+    private String getFileBase64(Long userId, ProfileDto profileDto) {
+        return "data:image/jpg;base64," + minioService.getFile(TypeBucket.user.name() + userId, profileDto.getPhoto());
+    }
+
+    @Override
+    public ProfileEntity getProfileByEmail(String email) {
+        ProfileEntity profile = profileRepository.findByUserEmail(email);
+        if (profile == null) {
+            throw new NotFoundObjectException("Profile with EMAIL=" + email + " does not exist.");
+        }
+        return profile;
     }
 
     @Transactional(readOnly = true)
@@ -53,11 +105,5 @@ public class ProfileServiceImpl implements ProfileService {
             throw new NotFoundObjectException("Profile with ID=" + userId + " does not exist.");
         }
         return profile;
-    }
-
-    private void existRights(Long userId, Long editingUserId) {
-        if (!userId.equals(editingUserId)) {
-            throw new AccessException("No rights to edit this user");
-        }
     }
 }

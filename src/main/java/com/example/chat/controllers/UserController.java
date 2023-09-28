@@ -3,7 +3,6 @@ package com.example.chat.controllers;
 import com.example.chat.dto.UserDto;
 import com.example.chat.dto.UserFullDto;
 import com.example.chat.dto.UserRegisterDto;
-import com.example.chat.dto.enums.Role;
 import com.example.chat.services.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -11,8 +10,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.web.authentication.logout.CookieClearingLogoutHandler;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.security.web.authentication.rememberme.AbstractRememberMeServices;
@@ -22,8 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import java.security.Principal;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.List;
 
 @Slf4j
 @Validated
@@ -34,9 +30,10 @@ public class UserController {
     private final UserService service;
 
     @PostMapping("/login")
-    public void apiLogin(Principal user) {
+    public Object apiLogin(Principal user) {
         log.info("Login user");
         UsernamePasswordAuthenticationToken token = ((UsernamePasswordAuthenticationToken) user);
+        return token.getPrincipal();
     }
 
     @PostMapping("/logout")
@@ -59,7 +56,7 @@ public class UserController {
         return service.createUser(newUser);
     }
 
-    @PutMapping("users/{userId}")
+    @PutMapping("/users/{userId}")
     public UserDto updateUser(@PathVariable Long userId,
                               @RequestBody UserRegisterDto updateUser) {
         log.info("PUT /users/registration/{userId} request received");
@@ -67,21 +64,21 @@ public class UserController {
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @DeleteMapping("users/{userId}")
+    @DeleteMapping("/users/{userId}")
     public void deleteUser(@PathVariable Long userId, Long deletedUserId) {
         log.info("DELETE /users/registration/{userId} request received");
         service.deleteUserById(userId, deletedUserId);
     }
 
-    @GetMapping("users/{userId}/search")
+    @GetMapping("/users/{userId}/search")
     public List<UserFullDto> searchUser(@PathVariable Long userId, @Valid @NotBlank @RequestParam String desired) {
         log.info("GET /users/{userId}/search request received");
         return service.searchUser(userId, desired);
     }
 
-    @GetMapping("users/{userId}")
-    public UserFullDto getUser(@PathVariable Long userId) {
-        log.info("GET /users/{userId}/search request received");
-        return service.getUser(userId);
+    @GetMapping("/users")
+    public UserFullDto getUser(@RequestParam String email) {
+        log.info("GET /users search request received");
+        return service.getUser(email);
     }
 }

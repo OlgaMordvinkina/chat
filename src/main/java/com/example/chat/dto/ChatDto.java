@@ -15,7 +15,7 @@ import java.util.Set;
 public class ChatDto {
     private Long id;
     private String title;
+    private String photo;
     private Availability type;
     private Set<Long> participants;
-//    private Set<UserDto> participants;
 }

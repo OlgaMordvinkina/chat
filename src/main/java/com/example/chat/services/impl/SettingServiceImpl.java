@@ -23,4 +23,10 @@ public class SettingServiceImpl implements SettingService {
         SettingEntity settingDefault = settingRepository.findById(settingId).orElse(null);
         return settingMapper.toSettingDto(settingDefault);
     }
+
+    @Override
+    @Transactional
+    public SettingEntity createSetting(SettingEntity entity) {
+        return settingRepository.save(entity);
+    }
 }

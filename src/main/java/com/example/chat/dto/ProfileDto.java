@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -16,4 +18,5 @@ public class ProfileDto {
     private String photo;
     private SettingDto setting;
     private Long userId;
+    private LocalDateTime onlineDate;
 }

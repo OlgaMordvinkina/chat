@@ -28,7 +28,7 @@ public class ChatController {
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{chatId}")
-    void deleteChat(@PathVariable Long userId,
+    public void deleteChat(@PathVariable Long userId,
                     @PathVariable Long chatId) {
         log.debug("DELETE /users/{userId}/chats/{chatId} request received");
         service.deleteChat(userId, chatId);
@@ -45,5 +45,13 @@ public class ChatController {
                                @PathVariable Long chatId) {
         log.debug("GET /users/{userId}/chats/{chatId} request received");
         return service.getChat(userId, chatId);
+    }
+
+    @PutMapping("/{chatId}")
+    public ChatDto updatePhotoChat(@PathVariable Long userId,
+                                   @PathVariable Long chatId,
+                                   @RequestBody String photo) {
+        log.debug("PUT /users/{userId}/chats/{chatId} request received");
+        return service.updatePhotoChat(userId, chatId, photo);
     }
 }

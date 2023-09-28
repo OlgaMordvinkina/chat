@@ -5,6 +5,7 @@ import com.example.chat.dto.UserDto;
 import com.example.chat.dto.UserFullDto;
 import com.example.chat.dto.UserRegisterDto;
 import com.example.chat.dto.enums.Role;
+import com.example.chat.dto.enums.TypeBucket;
 import com.example.chat.entities.PasswordEntity;
 import com.example.chat.entities.UserEntity;
 import com.example.chat.exceptions.AccessException;
@@ -13,6 +14,7 @@ import com.example.chat.exceptions.NotFoundObjectException;
 import com.example.chat.mappers.ProfileMapper;
 import com.example.chat.mappers.UserMapper;
 import com.example.chat.repositories.UserRepository;
+import com.example.chat.services.MinioService;
 import com.example.chat.services.ProfileService;
 import com.example.chat.services.UserService;
 import lombok.RequiredArgsConstructor;
@@ -30,10 +32,13 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final ProfileMapper profileMapper;
+    private final MinioService minioService;
 
     @Override
+    @Transactional
     public UserDto createUser(UserRegisterDto newUser) {
         newUser.setEmail(newUser.getEmail().toLowerCase());
+
         if (userRepository.findByEmail(newUser.getEmail())) {
             throw new EmailUniqueException(newUser.getEmail());
         }
@@ -42,14 +47,9 @@ public class UserServiceImpl implements UserService {
         user.setRole(Role.REGISTERED);
 
         PasswordEntity password = new PasswordEntity(newUser.getPassword());
-
         UserEntity userEntity = userMapper.toUserEntity(user, password);
-        UserEntity saveUser = userRepository.save(userEntity);
-
         ProfileDto profile = profileMapper.toProfileDto(newUser);
-        profile.setUserId(saveUser.getId());
-
-        profileService.createProfile(profile, userEntity);
+        UserEntity saveUser = profileService.createProfile(profile, userEntity);
 
         return userMapper.toUserDto(saveUser);
     }
@@ -57,11 +57,6 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto updateUser(Long userId, UserRegisterDto updateUser) {
         UserEntity user = getUserById(userId);
-//        existUserById(updatedUserId);
-//        existRights(userId, updatedUserId);
-//        if (updateUser.getName() != null || updateUser.getSurname() != null) {
-//            profileService.updateProfile(userId, updateUser);
-//        }
 
         if (updateUser.getEmail() != null) {
             if (userRepository.findByEmail(updateUser.getEmail())) {
@@ -106,8 +101,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserFullDto getUser(Long userId) {
-        return userMapper.toUserFullDto(profileService.findProfileByUserId(userId));
+    public UserFullDto getUser(String email) {
+        return userMapper.toUserFullDto(profileService.getProfileByEmail(email));
     }
 
     private void existRights(Long userId, Long editingUserId) {
@@ -123,9 +118,19 @@ public class UserServiceImpl implements UserService {
         for (String element : source) {
             String[] chatPreview = element.split(",");
 
-            userFull.id(Long.parseLong(chatPreview[0]));
+            long userId = Long.parseLong(chatPreview[0]);
+            userFull.id(userId);
             userFull.fullName(chatPreview[1] + " " + chatPreview[2]);
             userFull.email(chatPreview[3]);
+            String photo = chatPreview[4];
+            if (!photo.equals("null")) {
+                String file = minioService.getFile(TypeBucket.user.name() + userId, photo);
+                if (file != null) {
+                    userFull.photo("data:image/jpg;base64," + file);
+                }
+            } else {
+                userFull.photo(null);
+            }
 
             result.add(userFull.build());
         }

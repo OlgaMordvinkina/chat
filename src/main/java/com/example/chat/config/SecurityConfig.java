@@ -4,18 +4,16 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.annotation.web.configurers.HttpBasicConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 import javax.sql.DataSource;
-
-import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
 @EnableWebSecurity
@@ -25,15 +23,22 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.authorizeHttpRequests(authz -> authz
-                        .requestMatchers("/api/login/**").permitAll()
+        http
+                .httpBasic(Customizer.withDefaults())
+                .authorizeHttpRequests(authz -> authz
+                                .requestMatchers("/registration").permitAll()
+                                .requestMatchers("/ws/**").permitAll()
+                                .requestMatchers("/login/**").permitAll()
 //                        .requestMatchers("/api/chats").
 //                .requestMatchers("/api/**").hasAuthority(Role.REGISTERED.name())
-                        .anyRequest()
-                        .authenticated())
-                .httpBasic(withDefaults())
+                                .anyRequest()
+                                .authenticated()
+                )
+                .exceptionHandling(it -> it.authenticationEntryPoint((request, response, authException) -> response.setStatus(HttpStatus.UNAUTHORIZED.value())))
+                .formLogin(AbstractHttpConfigurer::disable)
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(AbstractHttpConfigurer::disable);
+
         return http.build();
     }
 

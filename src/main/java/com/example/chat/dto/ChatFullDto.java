@@ -15,6 +15,8 @@ import java.util.List;
 public class ChatFullDto {
     private Long id;
     private String title;
+    private String photo;
     private Availability type;
     private List<UserFullDto> participants;
+    private List<AttachmentDto> attachments;
 }
