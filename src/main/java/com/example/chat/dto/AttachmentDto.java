@@ -11,5 +11,5 @@ import lombok.NoArgsConstructor;
 @Builder
 public class AttachmentDto {
     private Long id;
-    private String externalId;
+    private String file;
 }

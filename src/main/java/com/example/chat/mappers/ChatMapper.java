@@ -13,14 +13,17 @@ public interface ChatMapper {
 
     @Mapping(target = "title", source = "title")
     @Mapping(target = "type", source = "type")
+    @Mapping(target = "photo", source = "photo")
     @Mapping(target = "participants", ignore = true)
     ChatDto toChatDto(ChatEntity entity);
 
     @Mapping(target = "id", expression = "java(null)")
+    @Mapping(target = "photo", source = "photo")
     @Mapping(target = "participants", ignore = true)
     ChatEntity toChatEntity(ChatDto dto);
 
     @Mapping(target = "participants", expression = "java((java.util.List<com.example.chat.dto.UserFullDto>) entity.getParticipants().stream()" +
             ".map(INSTANCE::toUserFullDto).collect(java.util.stream.Collectors.toList()))")
+    @Mapping(target = "attachments", ignore = true)
     ChatFullDto toChatFullDto(ChatEntity entity);
 }

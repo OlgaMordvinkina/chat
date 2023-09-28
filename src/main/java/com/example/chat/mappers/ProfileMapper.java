@@ -18,5 +18,6 @@ public interface ProfileMapper {
     @Mapping(target = "photo", expression = "java(null)")
     @Mapping(target = "setting", expression = "java(null)")
     @Mapping(target = "userId", expression = "java(null)")
+    @Mapping(target = "onlineDate", expression = "java(null)")
     ProfileDto toProfileDto(UserRegisterDto registerDto);
 }

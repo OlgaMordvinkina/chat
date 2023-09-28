@@ -27,15 +27,16 @@ public interface UserMapper {
     @Mapping(target = "id", source = "participant.key.user.id")
     @Mapping(target = "fullName", source = "participant.key.user", qualifiedByName = "fullName")
     @Mapping(target = "email", source = "participant.key.user.user.email")
-    @Mapping(target = "lastEntryDate", expression = "java(null)")
+    @Mapping(target = "onlineDate", source = "participant.key.user.onlineDate")
     @Mapping(target = "type", source = "participant.type")
+    @Mapping(target = "photo", source = "participant.key.user.photo")
     UserFullDto toUserFullDto(ParticipantEntity participant);
 
     @Mapping(target = "id", source = "id")
     @Mapping(target = "fullName", source = "profile", qualifiedByName = "fullName")
     @Mapping(target = "email", source = "user.email")
-    @Mapping(target = "lastEntryDate", expression = "java(null)")
     @Mapping(target = "type", expression = "java(null)")
+    @Mapping(target = "photo", source = "photo")
     UserFullDto toUserFullDto(ProfileEntity profile);
 
     @Named("fullName")

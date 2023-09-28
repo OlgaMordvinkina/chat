@@ -12,10 +12,13 @@ import lombok.NoArgsConstructor;
 @Builder
 public class ChatPreviewDto {
     private Long chatId;
-    //    private AttachmentDto attachment;
+    private Long messageId;
+    private Long companionId;
+    private String photo;
     private String title;
     private Long senderId;
     private String lastMessage;
     private String dateLastMessage;
     private StateMessage stateMessage;
+    private Long unreadMessages;
 }

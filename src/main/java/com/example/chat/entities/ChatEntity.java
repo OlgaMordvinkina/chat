@@ -19,6 +19,7 @@ public class ChatEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String title;
+    private String photo;
     @Enumerated(value = EnumType.STRING)
     private Availability type;
     @OneToMany(fetch = FetchType.LAZY)

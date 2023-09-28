@@ -3,6 +3,8 @@ package com.example.chat.entities;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 @ToString
@@ -17,12 +19,13 @@ public class ProfileEntity {
     private Long id;
     private String name;
     private String surname;
-    @Column(name = "photo_id")
     private String photo;
     @ManyToOne
     @JoinColumn(name = "setting_id", referencedColumnName = "id")
     private SettingEntity setting;
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private UserEntity user;
+    @Column(name = "online_date")
+    private LocalDateTime onlineDate;
 }

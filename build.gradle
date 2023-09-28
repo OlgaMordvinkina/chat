@@ -39,6 +39,7 @@ dependencies {
 	implementation 'org.springframework:spring-websocket'
 	implementation 'org.springframework:spring-messaging'
 	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+	implementation 'io.minio:minio:8.5.2'
 }
 
 tasks.named('test') {

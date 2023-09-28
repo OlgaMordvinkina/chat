@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -14,6 +16,7 @@ public class UserFullDto {
     private Long id;
     private String fullName;
     private String email;
-    private String lastEntryDate;
+    private LocalDateTime onlineDate;
     private TypeParticipant type;
+    private String photo;
 }

@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -27,18 +26,16 @@ public class SecurityConfig {
         http
                 .httpBasic(Customizer.withDefaults())
                 .authorizeHttpRequests(authz -> authz
-                                .requestMatchers("/api/registration").permitAll()
-                                .requestMatchers(HttpMethod.GET, "/api/test/**").permitAll()
-                                .requestMatchers(HttpMethod.GET, "/api/test/**").anonymous()
-//                                .requestMatchers(HttpMethod.GET, "/api/test/**").access(it -> it.g)
-                                .requestMatchers("/api/ws/**").permitAll()
-                                .requestMatchers("/api/login/**").permitAll()
+                                .requestMatchers("/registration").permitAll()
+                                .requestMatchers("/ws/**").permitAll()
+                                .requestMatchers("/login/**").permitAll()
 //                        .requestMatchers("/api/chats").
 //                .requestMatchers("/api/**").hasAuthority(Role.REGISTERED.name())
                                 .anyRequest()
                                 .authenticated()
                 )
                 .exceptionHandling(it -> it.authenticationEntryPoint((request, response, authException) -> response.setStatus(HttpStatus.UNAUTHORIZED.value())))
+                .formLogin(AbstractHttpConfigurer::disable)
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(AbstractHttpConfigurer::disable);
 

@@ -4,48 +4,53 @@ import com.example.chat.controllers.ChatController;
 import com.example.chat.controllers.MessageController;
 import com.example.chat.dto.*;
 import com.example.chat.dto.enums.Availability;
+import com.example.chat.entities.MessageEntity;
 import com.example.chat.mappers.SettingMapper;
+import com.example.chat.repositories.MessageRepository;
 import com.example.chat.repositories.SettingRepository;
-import com.example.chat.repositories.UserRepository;
 import com.example.chat.services.UserService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.Set;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class Initializer {
     private final SettingRepository settingRepository;
     private final UserService userService;
     private final SettingMapper settingMapper;
     private final ChatController chatController;
     private final MessageController messageController;
-    private final UserRepository userRepository;
+    private final MessageRepository messageRepository;
 
-    private final ChatDto chat1 = new ChatDto(null, null, Availability.PRIVATE, null);
-    private final ChatDto chat2 = new ChatDto(null, null, Availability.PRIVATE, null);
-    private final ChatDto chat3 = new ChatDto(null, null, Availability.PRIVATE, null);
-    private final ChatDto chat4 = new ChatDto(null, "Групповой чатик", Availability.GROUP, null);
-    private final ChatDto chat5 = new ChatDto(null, "Групповой", Availability.GROUP, null);
-    private final UserRegisterDto user1 = new UserRegisterDto("петренко@mail.ru", "12345678", "12345678", "Полина", "Петренко");
-    private final UserRegisterDto user2 = new UserRegisterDto("мануйлова@mail.ru", "00000000", "00000000", "Валентина", "Мануйлова");
-    private final UserRegisterDto user3 = new UserRegisterDto("кузьмина@mail.ru", "11112222", "11112222", "Екатерина", "Кузьмина");
-    private final UserRegisterDto user4 = new UserRegisterDto("admin@mail.ru", "admin000", "admin000", "Ольга", "Орлова");
+    private final ChatDto chat1 = new ChatDto(null, null, null, Availability.PRIVATE, null);
+    private final ChatDto chat2 = new ChatDto(null, null, null, Availability.PRIVATE, null);
+    private final ChatDto chat3 = new ChatDto(null, null, null, Availability.PRIVATE, null);
+    private final ChatDto chat4 = new ChatDto(null, "Групповой чатик", null, Availability.GROUP, null);
+    private final ChatDto chat5 = new ChatDto(null, "Групповой", null, Availability.GROUP, null);
     private final MessageDto message = new MessageDto();
 
     public void initial() {
-        settingRepository.save(settingMapper.toSettingEntity(new SettingDto(null, "{sound-1}")));
+//        createdAll();
+    }
 
-        UserDto user1 = userService.createUser(this.user1);
-        UserDto user2 = userService.createUser(this.user2);
-        UserDto user3 = userService.createUser(this.user3);
-        UserDto user4 = userService.createUser(this.user4);
-        userService.createUser(new UserRegisterDto("Белов@mail.ru", "02516486", "02516486", "Олег", "Белов"));
-        userService.createUser(new UserRegisterDto("Перебейло@mail.ru", "16548951", "16548951", "Марина", "Перебейло"));
-        userService.createUser(new UserRegisterDto("Крюковский@mail.ru", "02322548", "02322548", "Даниил", "Крюковский"));
-        userService.createUser(new UserRegisterDto("Брошка@mail.ru", "62515881", "62515881", "Рита", "Брошка"));
-//        userRepository.save(new UserEntity(null, "admin", new PasswordEntity("00000000"), Role.REGISTERED));
+    private void createdAll() {
+        settingRepository.save(settingMapper.toSettingEntity(new SettingDto(null, "{sound-1}")));
+        MessageEntity entity = new MessageEntity();
+        entity.setId(0L);
+        messageRepository.save(entity);
+
+        UserDto user1 = userService.createUser(new UserRegisterDto("петренко@mail.ru", "00000000", "00000000", "Полина", "Петренко", null, null));
+        UserDto user2 = userService.createUser(new UserRegisterDto("мануйлова@mail.ru", "00000000", "00000000", "Валентина", "Мануйлова", null, null));
+        UserDto user3 = userService.createUser(new UserRegisterDto("кузьмина@mail.ru", "00000000", "00000000", "Екатерина", "Кузьмина", null, null));
+        userService.createUser(new UserRegisterDto("admin@mail.ru", "00000000", "00000000", "Ольга", "Орлова", null, null));
+        userService.createUser(new UserRegisterDto("Белов@mail.ru", "00000000", "00000000", "Олег", "Белов", null, null));
+        userService.createUser(new UserRegisterDto("Перебейло@mail.ru", "00000000", "00000000", "Марина", "Перебейло", null, null));
+        userService.createUser(new UserRegisterDto("Крюковский@mail.ru", "00000000", "00000000", "Даниил", "Крюковский", null, null));
+        userService.createUser(new UserRegisterDto("Брошка@mail.ru", "00000000", "00000000", "Рита", "Брошка", null, null));
 
         chat1.setParticipants(Set.of(user1.getId()));
         chatController.createChat(4L, chat1);
@@ -59,9 +64,11 @@ public class Initializer {
         chatController.createChat(4L, chat5);
 
         message.setText("Привет");
-        messageController.createMessage(1L, 1L, message);
+        MessageDto message1 = messageController.createMessage(1L, 1L, message);
         message.setText("Привет");
+        message.setReplyMessage(message1);
         messageController.createMessage(4L, 1L, message);
+        message.setReplyMessage(null);
         message.setText("Как дела?");
         messageController.createMessage(1L, 1L, message);
         message.setText("Изначально повесть задумывалась более сложной и объёмной, но редактор Уолтер Брэдбери (однофамилец) предложил писателю: «Возьми эту книгу за уши и потяни в разные стороны. Она разорвётся на две части. Каждая вторая [история] выпадет");
@@ -92,7 +99,5 @@ public class Initializer {
         messageController.createMessage(4L, 4L, message);
         message.setText("2013 года. Дата обращения: 11 декабря 2013.");
         messageController.createMessage(3L, 4L, message);
-
-//        messageController.updateMessage(2L, 2L, 2L, message);
     }
 }

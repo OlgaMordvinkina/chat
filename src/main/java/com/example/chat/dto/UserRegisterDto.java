@@ -37,4 +37,6 @@ public class UserRegisterDto {
     @NotBlank
     @Size(min = 2, max = 30)
     private String surname;
+    private Long settingId;
+    private String photoUser;
 }

@@ -5,15 +5,15 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-
 @Repository
 public interface ChatRepository extends JpaRepository<ChatEntity, Long> {
-    @Query(value = "SELECT DISTINCT c.id, " +
+    @Query(value = "SELECT DISTINCT c.id, m.id, " +
             "CASE WHEN c.type = 'PRIVATE' THEN CONCAT(pr.surname, ' ', pr.name) ELSE c.title END AS title, " +
             "m.sender_id, " +
             "m.create_date, " +
             "m.state, " +
+            "CASE WHEN c.type = 'PRIVATE' THEN pr.user_id ELSE NULL END AS companionId, " +
+            "CASE WHEN c.type = 'PRIVATE' THEN pr.photo ELSE c.photo END AS photo, " +
             "m.text " +
             "FROM chats c " +
             "LEFT JOIN ( " +
@@ -51,13 +51,4 @@ public interface ChatRepository extends JpaRepository<ChatEntity, Long> {
             "HAVING count " +
             "(DISTINCT p.key.user.id) = 2)")
     ChatEntity getChat(Long userIdOne, Long userIdTwo);
-
-    @Query("SELECT p.key.chatId " +
-            "FROM ChatEntity c " +
-            "JOIN ParticipantEntity p ON p.key.chatId=c.id " +
-            "WHERE c.type='PRIVATE' " +
-            "AND (p.key.user.id = :userIdOne OR p.key.user.id = :userIdTwo) " +
-            "GROUP BY p.key.chatId " +
-            "HAVING count (DISTINCT p.key.user.id) = 2")
-    List<Long> get(Long userIdOne, Long userIdTwo);
 }

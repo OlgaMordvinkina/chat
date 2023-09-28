@@ -17,10 +17,6 @@ import java.io.Serializable;
 @NoArgsConstructor
 @Embeddable
 public class CompositeKey implements Serializable {
-    //    @ManyToOne
-//    @JoinColumn(name = "chat_id", referencedColumnName = "id", updatable = false, insertable = false, nullable = false)
-//    private ChatEntity chat;
-//    @JoinColumn(name = "chat_id", referencedColumnName = "id", updatable = false, insertable = false, nullable = false)
     @Column(name = "chat_id")
     private Long chatId;
     @ManyToOne
