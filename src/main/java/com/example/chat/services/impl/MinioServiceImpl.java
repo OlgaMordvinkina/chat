@@ -100,7 +100,10 @@ public class MinioServiceImpl implements MinioService {
                                  .object(nameFile)
                                  .build())) {
                 byte[] fileBytes = IOUtils.toByteArray(stream);
-                return Base64.getEncoder().encodeToString(fileBytes);
+                String photo = Base64.getEncoder().encodeToString(fileBytes);
+                if (photo != null) {
+                    return "data:image/jpg;base64," + photo;
+                }
             } catch (MinioException e) {
                 e.getStackTrace();
                 return null;
@@ -127,4 +130,23 @@ public class MinioServiceImpl implements MinioService {
         }
         return images;
     }
+
+    @Override
+    @SneakyThrows
+    public List<String> getFilesByNames(String nameBucket, List<String> objectNames) {
+        List<String> images = new ArrayList<>();
+        try {
+            for (String objectName : objectNames) {
+                try (InputStream stream = minioClient.getObject(GetObjectArgs.builder().bucket(nameBucket).object(objectName).build())) {
+                    byte[] fileBytes = IOUtils.toByteArray(stream);
+                    String base64Image = Base64.getEncoder().encodeToString(fileBytes);
+                    images.add("data:image/jpg;base64," + base64Image);
+                }
+            }
+        } catch (MinioException e) {
+            return images;
+        }
+        return images;
+    }
+
 }

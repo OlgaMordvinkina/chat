@@ -7,13 +7,12 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class AppConfig {
-    @Value("${MINIO_ENDPOINT}")
+    @Value("${minio_endpoint}")
     private String endpoint;
-    @Value("${MINIO_ACCESS_KEY}")
+    @Value("${minio_access_key}")
     private String accessKey;
-    @Value("${MINIO_SECRET_KEY}")
+    @Value("${minio_secret_key}")
     private String secretKey;
-
 
     @Bean
     public MinioClient minioClient() {

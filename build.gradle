@@ -35,11 +35,11 @@ dependencies {
 	implementation 'org.postgresql:postgresql:42.2.27'
 	implementation 'javax.validation:validation-api:2.0.1.Final'
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0'
-//	implementation 'org.springframework.boot:spring-boot-starter-websocket'
 	implementation 'org.springframework:spring-websocket'
 	implementation 'org.springframework:spring-messaging'
 	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
 	implementation 'io.minio:minio:8.5.2'
+	implementation group: 'org.flywaydb', name: 'flyway-maven-plugin', version: '9.22.2'
 }
 
 tasks.named('test') {

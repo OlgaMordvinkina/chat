@@ -18,6 +18,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Positive;
 import java.util.List;
 import java.util.Objects;
 
@@ -36,7 +37,7 @@ public class MessageController {
     public MessageDto createMessage(@PathVariable Long userId,
                                     @PathVariable Long chatId,
                                     @RequestBody MessageDto newMessage) {
-        log.info("POST /users/{userId}/chats/{chatId}/messages request received");
+        log.info("POST /users/" + userId + "/chats/" + chatId + "/messages request received");
         MessageDto createdMessage = service.createMessage(userId, chatId, newMessage);
 
         sendToWebsocket(createdMessage, "CREATE");
@@ -48,7 +49,7 @@ public class MessageController {
     public MessageDto updateMessage(@PathVariable Long userId,
                                     @PathVariable Long chatId,
                                     @RequestBody MessageDto newMessage) {
-        log.info("PUT /users/{userId}/chats/{chatId}/messages/{messageId} request received");
+        log.info("PUT /users/" + userId + "/chats/" + chatId + "/messages request received");
         ProfileDto profileDto = new ProfileDto();
         profileDto.setUserId(userId);
         newMessage.setSender(profileDto);
@@ -64,7 +65,7 @@ public class MessageController {
     @PutMapping("/{chatId}/messages/state")
     public void updateStateMessage(@PathVariable Long userId,
                                    @PathVariable Long chatId) {
-        log.info("PUT /users/{userId}/chats/{chatId}/messages/state request received");
+        log.info("PUT /users/" + userId + "/chats/" + chatId + "/messages/state request received");
 
         service.updateStateMessages(userId, chatId);
         sendToWebsocket(chatId);
@@ -75,16 +76,18 @@ public class MessageController {
     public void deleteMessage(@PathVariable Long userId,
                               @PathVariable Long chatId,
                               @PathVariable Long messageId) {
-        log.info("DELETE /users/{userId}/chats/{chatId}/messages/{messageId} request received");
+        log.info("DELETE /users/" + userId + "/chats/" + chatId + "/messages/" + messageId + " request received");
         MessageDto message = service.deleteMessage(userId, chatId, messageId);
         sendToWebsocket(message, "DELETE");
     }
 
     @GetMapping("/{chatId}/messages")
     public List<MessageDto> getMessages(@PathVariable Long userId,
-                                        @PathVariable Long chatId) {
-        log.info("GET /users/{userId}/chats/{chatId}/messages request received");
-        return service.getMessages(userId, chatId);
+                                        @PathVariable Long chatId,
+                                        @RequestParam(defaultValue = "1") @Positive int page,
+                                        @RequestParam(defaultValue = "15") @Positive int size) {
+        log.info("GET /users/" + userId + "/chats/" + chatId + "/messages?page=" + page + "?size=" + size + " request received");
+        return service.getMessages(userId, chatId, page, size);
     }
 
     @GetMapping("/messages/search")
@@ -95,7 +98,7 @@ public class MessageController {
                                             @NotBlank
                                             @Pattern(regexp = "^\\S*$")
                                             @RequestParam String desired) throws IllegalAccessException {
-        log.debug("GET /users/{userId}/chats/messages/search request received");
+        log.debug("GET /users/" + userId + "/chats/messages/search request received");
         return service.searchMessagesChats(userId, null, desired, TypeSearch.ALL_CHATS);
     }
 
@@ -108,7 +111,7 @@ public class MessageController {
                                             @NotBlank
                                             @Pattern(regexp = "^\\S*$")
                                             @RequestParam String desired) throws IllegalAccessException {
-        log.debug("GET /users/{userId}/chats/{chatId}/messages/search request received");
+        log.debug("GET /users/" + userId + "/chats/" + chatId + "/messages/search request received");
         return service.searchMessagesChats(userId, chatId, desired, TypeSearch.THIS_CHAT);
     }
 

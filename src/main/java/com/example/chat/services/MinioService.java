@@ -13,4 +13,6 @@ public interface MinioService {
     String getFile(String nameBucket, String nameFile);
 
     List<String> getFiles(String nameBucket);
+
+    List<String> getFilesByNames(String nameBucket, List<String> objectNames);
 }

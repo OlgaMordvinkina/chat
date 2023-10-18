@@ -85,7 +85,7 @@ public class ProfileServiceImpl implements ProfileService {
     }
 
     private String getFileBase64(Long userId, ProfileDto profileDto) {
-        return "data:image/jpg;base64," + minioService.getFile(TypeBucket.user.name() + userId, profileDto.getPhoto());
+        return minioService.getFile(TypeBucket.user.name() + userId, profileDto.getPhoto());
     }
 
     @Override

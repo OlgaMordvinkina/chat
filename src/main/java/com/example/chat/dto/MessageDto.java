@@ -6,7 +6,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.validation.constraints.NotBlank;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -20,7 +19,6 @@ public class MessageDto {
     private ChatDto chat;
     private LocalDateTime createDate;
     private StateMessage state;
-    @NotBlank
     private String text;
     private MessageDto replyMessage;
     private List<MessageDto> forwardFrom;

@@ -3,6 +3,7 @@ package com.example.chat.repositories;
 import com.example.chat.dto.enums.StateMessage;
 import com.example.chat.entities.MessageEntity;
 import jakarta.persistence.OrderBy;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -14,7 +15,7 @@ import java.util.Set;
 
 @Repository
 public interface MessageRepository extends JpaRepository<MessageEntity, Long> {
-    List<MessageEntity> findAllByChat_IdOrderById(Long chatId);
+    List<MessageEntity> findAllByChat_Id(Long chatId, Pageable pageable);
 
     @OrderBy("createDate ASC")
     List<MessageEntity> findAllByIdInOrderById(Set<Long> ids);
@@ -61,4 +62,6 @@ public interface MessageRepository extends JpaRepository<MessageEntity, Long> {
             "SET reply_message = 0 " +
             "WHERE reply_message=:messageId ", nativeQuery = true)
     void updateReplyMessage(@Param("messageId") Long messageId);
+
+    int countByChat_Id(Long chatId);
 }

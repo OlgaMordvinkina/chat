@@ -123,11 +123,10 @@ public class UserServiceImpl implements UserService {
             userFull.fullName(chatPreview[1] + " " + chatPreview[2]);
             userFull.email(chatPreview[3]);
             String photo = chatPreview[4];
+//            userFull.photo(photo); // todo: замена кода снизу  todo: photo from minio
             if (!photo.equals("null")) {
                 String file = minioService.getFile(TypeBucket.user.name() + userId, photo);
-                if (file != null) {
-                    userFull.photo("data:image/jpg;base64," + file);
-                }
+                userFull.photo(file);
             } else {
                 userFull.photo(null);
             }

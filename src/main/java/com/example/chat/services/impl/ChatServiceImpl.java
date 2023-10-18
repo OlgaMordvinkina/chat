@@ -5,20 +5,20 @@ import com.example.chat.dto.enums.Availability;
 import com.example.chat.dto.enums.StateMessage;
 import com.example.chat.dto.enums.TypeBucket;
 import com.example.chat.dto.enums.TypeParticipant;
+import com.example.chat.entities.AttachmentEntity;
 import com.example.chat.entities.ChatEntity;
 import com.example.chat.entities.ParticipantEntity;
 import com.example.chat.exceptions.AccessException;
 import com.example.chat.exceptions.NotFoundObjectException;
 import com.example.chat.mappers.ChatMapper;
-import com.example.chat.repositories.ChatRepository;
-import com.example.chat.repositories.MessageRepository;
-import com.example.chat.repositories.ParticipantRepository;
-import com.example.chat.repositories.UserRepository;
+import com.example.chat.repositories.*;
 import com.example.chat.services.ChatService;
 import com.example.chat.services.MinioService;
 import com.example.chat.services.ParticipantService;
 import com.example.chat.services.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,6 +39,7 @@ public class ChatServiceImpl implements ChatService {
     private final UserService userService;
     private final ChatRepository chatRepository;
     private final MessageRepository messageRepository;
+    private final AttachmentRepository attachmentRepository;
     private final ParticipantRepository participantRepository;
     private final ChatMapper chatMapper;
     private final MinioService minioService;
@@ -156,16 +157,27 @@ public class ChatServiceImpl implements ChatService {
         if (chat.getPhoto() != null) {
             chatFull.setPhoto(getFileBase64(chatId, chat.getPhoto(), TypeBucket.chat.name()));
         }
-
-        List<String> files = minioService.getFiles(TypeBucket.attachmentschat.name() + chatId);
-        if (!files.isEmpty()) {
-            List<AttachmentDto> attachments = files.stream()
-                    .map(it -> new AttachmentDto(null, it))
-                    .toList();
-            chatFull.setAttachments(attachments);
-        }
+// todo: photo from minio
 
         return chatFull;
+    }
+
+    @Override
+    public List<AttachmentDto> getAttachmentsChat(Long userId, Long chatId, int page, int size) {
+        Pageable pages = PageRequest.of(--page, size);
+        List<AttachmentEntity> attachments = attachmentRepository.findByChatId(chatId, pages);
+
+        List<AttachmentDto> files = new ArrayList<>();
+        attachments.forEach(it -> {
+            var dto = AttachmentDto.builder();
+            dto.id(it.getId());
+            dto.file(minioService.getFile(TypeBucket.attachmentschat.name() + chatId, it.getNameFile()));
+            files.add(dto.build());
+        });
+        if (!files.isEmpty()) {
+            return files;
+        }
+        return null;
     }
 
     @Override
@@ -216,6 +228,7 @@ public class ChatServiceImpl implements ChatService {
             preview.companionId(companionId);
 
             String nameFile = Objects.equals(chatPreview[7], "null") ? null : chatPreview[7];
+//            todo: photo from minio
             if (nameFile != null) {
                 preview.photo(
                         companionId != null ?
@@ -245,10 +258,6 @@ public class ChatServiceImpl implements ChatService {
     }
 
     private String getFileBase64(Long id, String nameFile, String type) {
-        String file = minioService.getFile(type + id, nameFile);
-        if (file != null) {
-            return "data:image/jpg;base64," + file;
-        }
-        return null;
+        return minioService.getFile(type + id, nameFile);
     }
 }

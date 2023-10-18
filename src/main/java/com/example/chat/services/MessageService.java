@@ -13,7 +13,7 @@ public interface MessageService {
 
     MessageDto deleteMessage(Long userId, Long chatId, Long messageId);
 
-    List<MessageDto> getMessages(Long userId, Long chatId);
+    List<MessageDto> getMessages(Long userId, Long chatId, int page, int size);
 
     MessageDto getLastMessageByChat(Long chatId);
 
