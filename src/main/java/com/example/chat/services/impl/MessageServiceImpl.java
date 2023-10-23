@@ -58,8 +58,8 @@ public class MessageServiceImpl implements MessageService {
                 ? getMessageById(newMessage.getReplyMessage().getId())
                 : null;
 
-        List<MessageEntity> forwardFrom = newMessage.getForwardFrom() != null
-                ? messageRepository.findAllByIdInOrderById(newMessage.getForwardFrom().stream().map(MessageDto::getId).collect(Collectors.toSet()))
+        List<MessageEntity> forwardFrom = newMessage.getForwardedFrom() != null
+                ? messageRepository.findAllByIdInOrderById(newMessage.getForwardedFrom().stream().map(MessageDto::getId).collect(Collectors.toSet()))
                 : null;
 
         MessageEntity message = messageMapper.toMessageEntity(newMessage, sender, chat, replyMessageId, forwardFrom);
@@ -70,7 +70,6 @@ public class MessageServiceImpl implements MessageService {
                 var attachmentEntity = AttachmentEntity.builder();
                 String nameAttachment = minioService.putFile(TypeBucket.attachmentschat.name() + chatId.toString(), attachment.getFile());
                 attachmentEntity.nameFile(nameAttachment);
-                attachmentEntity.chatId(chatId);
                 attachments.add(attachmentRepository.save(attachmentEntity.build()));
             });
             message.setAttachments(attachments);
@@ -118,10 +117,9 @@ public class MessageServiceImpl implements MessageService {
         int pageNumber = page - 1;
         Pageable pages = PageRequest.of(pageNumber, size, Sort.by(Sort.Direction.DESC, "id"));
         List<MessageDto> messages = toListMessageDto(chatId, messageRepository.findAllByChat_Id(chatId, pages));
-//        todo: photo from minio
         messages.forEach(message -> {
             String photo = message.getSender().getPhoto();
-            message.getSender().setPhoto(photo != null ? minioService.getFile(TypeBucket.user.name() + message.getSender().getId(), photo) : null);
+            message.getSender().setPhoto(photo != null ? minioService.getUrlFiles(TypeBucket.user.name() + message.getSender().getId(), photo) : null);
         });
         return messages;
     }
@@ -191,9 +189,8 @@ public class MessageServiceImpl implements MessageService {
 
         msg.forEach(message -> {
                     List<AttachmentDto> attachments = new ArrayList<>();
-// todo: photo from minio
                     message.getAttachments().forEach(attachment -> {
-                        String fileBase64 = minioService.getFile(TypeBucket.attachmentschat.name() + chatId, attachment.getFile());
+                        String fileBase64 = minioService.getUrlFiles(TypeBucket.attachmentschat.name() + chatId, attachment.getFile());
                         attachments.add(new AttachmentDto(attachment.getId(), fileBase64));
                     });
 

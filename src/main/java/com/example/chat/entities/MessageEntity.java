@@ -29,22 +29,22 @@ public class MessageEntity {
     private LocalDateTime createDate;
     @Enumerated(value = EnumType.STRING)
     private StateMessage state;
-    @Column(columnDefinition = "TEXT")
+    @Column(name = "text_message", columnDefinition = "TEXT")
     private String text;
-
-//    @Column todo
-//    private Long privateMessageId;
 
     @ManyToOne
     @JoinColumn(name = "reply_message_id", unique = false)
-//    @JoinColumn(name = "reply_message", unique = false)
     private MessageEntity replyMessage;
 
     @OneToMany
-    @JoinColumn(name = "forward_from")
-    private List<MessageEntity> forwardFrom;
+    @ElementCollection
+    @CollectionTable(name = "ForwardedMessages", joinColumns = @JoinColumn(name = "message_id"))
+    @Column(name = "forwarded_message_id")
+    @ToString.Exclude
+    private List<MessageEntity> forwardedFrom;
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     @JoinColumn(name = "message_id", referencedColumnName = "id")
+    @ToString.Exclude
     private List<AttachmentEntity> attachments;
 }

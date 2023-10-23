@@ -39,7 +39,7 @@ dependencies {
 	implementation 'org.springframework:spring-messaging'
 	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
 	implementation 'io.minio:minio:8.5.2'
-	implementation group: 'org.flywaydb', name: 'flyway-maven-plugin', version: '9.22.2'
+	implementation 'org.flywaydb:flyway-core'
 }
 
 tasks.named('test') {

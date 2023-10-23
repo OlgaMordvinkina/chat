@@ -9,7 +9,6 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -33,7 +32,7 @@ public class MessageController {
     private final SimpMessagingTemplate messagingTemplate;
 
     @ResponseStatus(HttpStatus.CREATED)
-    @PostMapping(value = "/{chatId}/messages", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @PostMapping(value = "/{chatId}/messages")
     public MessageDto createMessage(@PathVariable Long userId,
                                     @PathVariable Long chatId,
                                     @RequestBody MessageDto newMessage) {

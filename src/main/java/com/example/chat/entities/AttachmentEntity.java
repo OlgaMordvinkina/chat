@@ -17,8 +17,6 @@ public class AttachmentEntity {
     private Long id;
     @Column(name = "message_id")
     private Long messageId;
-    @Column(name = "chat_id")
-    private Long chatId;
     @Column(name = "name_file")
     private String nameFile;
 }

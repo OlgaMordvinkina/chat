@@ -22,5 +22,6 @@ public class PasswordEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Column(name = "user_password")
     private String password;
 }

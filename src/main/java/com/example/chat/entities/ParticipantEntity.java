@@ -15,6 +15,7 @@ import lombok.*;
 public class ParticipantEntity {
     @EmbeddedId
     private CompositeKey key;
+    @Column(name = "participant_type")
     @Enumerated(value = EnumType.STRING)
     private TypeParticipant type;
 }

@@ -21,7 +21,7 @@ public class MessageDto {
     private StateMessage state;
     private String text;
     private MessageDto replyMessage;
-    private List<MessageDto> forwardFrom;
+    private List<MessageDto> forwardedFrom;
     private List<AttachmentDto> attachments;
 
     private String typeMessage;

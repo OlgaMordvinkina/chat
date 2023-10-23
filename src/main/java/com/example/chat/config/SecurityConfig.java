@@ -47,13 +47,13 @@ public class SecurityConfig {
         auth.jdbcAuthentication().dataSource(dataSource)
                 .passwordEncoder(new BCryptPasswordEncoder())
                 .usersByUsernameQuery(
-                        "select u.email as username, p.password as password, true enable " +
+                        "select u.email as username, p.user_password as password, true as enable " +
                                 "from users as u " +
                                 "inner join passwords as p on u.password_id=p.id " +
                                 "where u.email=?"
                 )
                 .authoritiesByUsernameQuery(
-                        "select email as username, role " +
+                        "select email as username, user_role as role " +
                                 "from users " +
                                 "where email=?"
                 );

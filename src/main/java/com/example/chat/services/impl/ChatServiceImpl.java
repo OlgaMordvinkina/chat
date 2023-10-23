@@ -147,7 +147,7 @@ public class ChatServiceImpl implements ChatService {
                         .ifPresent(participant -> {
                             String photo = participant.getKey().getUser().getPhoto();
                             if (photo != null) {
-                                String fileBase64 = getFileBase64(user.getId(), photo, TypeBucket.user.name());
+                                String fileBase64 = getUrlFiles(user.getId(), photo, TypeBucket.user.name());
                                 user.setPhoto(fileBase64);
                             }
                         }))
@@ -155,10 +155,8 @@ public class ChatServiceImpl implements ChatService {
         chatFull.setParticipants(participants);
 
         if (chat.getPhoto() != null) {
-            chatFull.setPhoto(getFileBase64(chatId, chat.getPhoto(), TypeBucket.chat.name()));
+            chatFull.setPhoto(getUrlFiles(chatId, chat.getPhoto(), TypeBucket.chat.name()));
         }
-// todo: photo from minio
-
         return chatFull;
     }
 
@@ -171,7 +169,7 @@ public class ChatServiceImpl implements ChatService {
         attachments.forEach(it -> {
             var dto = AttachmentDto.builder();
             dto.id(it.getId());
-            dto.file(minioService.getFile(TypeBucket.attachmentschat.name() + chatId, it.getNameFile()));
+            dto.file(minioService.getUrlFiles(TypeBucket.attachmentschat.name() + chatId, it.getNameFile()));
             files.add(dto.build());
         });
         if (!files.isEmpty()) {
@@ -192,26 +190,23 @@ public class ChatServiceImpl implements ChatService {
         }
     }
 
-    private List<ChatPreviewDto> convertToChatPreviewDto(String[] source) {
+    private List<ChatPreviewDto> convertToChatPreviewDto(List<Map<String, Object>> source) {
         List<ChatPreviewDto> result = new ArrayList<>();
-
         var preview = ChatPreviewDto.builder();
-        for (String element : source) {
-            String[] chatPreview = element.split(",");
-
-            long chatId = Long.parseLong(chatPreview[0]);
+        for (Map<String, Object> element : source) {
+            long chatId = Long.parseLong(element.get("chatId").toString());
             preview.chatId(chatId);
-            preview.messageId(!Objects.equals(chatPreview[1], "null") ? Long.parseLong(chatPreview[1]) : null);
-            preview.title(chatPreview[2]);
-            Long senderId = !Objects.equals(chatPreview[3], "null") ? Long.parseLong(chatPreview[3]) : null;
+            preview.messageId(!Objects.equals(element.get("messageId"), null) ? Long.parseLong(element.get("messageId").toString()) : null);
+            preview.title(element.get("title").toString());
+            Long senderId = !Objects.equals(element.get("senderId"), null) ? Long.parseLong(element.get("senderId").toString()) : null;
             preview.senderId(senderId);
 
-            if (!Objects.equals(chatPreview[4], "null")) {
+            if (!Objects.equals(element.get("dateLastMessage"), null)) {
                 DateTimeFormatter formatter = new DateTimeFormatterBuilder()
                         .appendPattern("yyyy-MM-dd HH:mm:ss")
                         .appendFraction(ChronoField.MILLI_OF_SECOND, 1, 6, true)
                         .toFormatter();
-                LocalDateTime dateLastMessage = LocalDateTime.parse(chatPreview[4], formatter);
+                LocalDateTime dateLastMessage = LocalDateTime.parse(element.get("dateLastMessage").toString(), formatter);
 
                 LocalDate currentDate = LocalDate.now();
                 if (dateLastMessage.toLocalDate().isEqual(currentDate)) {
@@ -222,30 +217,25 @@ public class ChatServiceImpl implements ChatService {
             } else {
                 preview.dateLastMessage("");
             }
-            preview.stateMessage(!Objects.equals(chatPreview[5], "null") ? StateMessage.valueOf(chatPreview[5]) : null);
+            preview.stateMessage(!Objects.equals(element.get("stateMessage"), null) ? StateMessage.valueOf(element.get("stateMessage").toString()) : null);
 
-            Long companionId = !Objects.equals(chatPreview[6], "null") ? Long.valueOf(chatPreview[6]) : null;
+            Long companionId = !Objects.equals(element.get("companionId"), null) ? Long.valueOf(element.get("companionId").toString()) : null;
             preview.companionId(companionId);
 
-            String nameFile = Objects.equals(chatPreview[7], "null") ? null : chatPreview[7];
-//            todo: photo from minio
+            String nameFile = Objects.equals(element.get("nameFile"), null) ? null : element.get("nameFile").toString();
             if (nameFile != null) {
                 preview.photo(
                         companionId != null ?
-                                getFileBase64(companionId, nameFile, TypeBucket.user.name()) :
-                                getFileBase64(chatId, nameFile, TypeBucket.chat.name())
+                                getUrlFiles(companionId, nameFile, TypeBucket.user.name()) :
+                                getUrlFiles(chatId, nameFile, TypeBucket.chat.name())
                 );
             } else {
                 preview.photo(null);
             }
 
 
-            String lastMessage = String.join(",", Arrays.copyOfRange(chatPreview, 8, chatPreview.length));
-            if (!lastMessage.equals("null")) {
-                preview.lastMessage(lastMessage);
-            } else {
-                preview.lastMessage("");
-            }
+            String lastMessage = element.get("text").toString();
+            preview.lastMessage(lastMessage);
 
             if (senderId != null) {
                 preview.unreadMessages(messageRepository.countByChat_IdAndStateAndSender_Id(chatId, StateMessage.SENT, senderId));
@@ -257,7 +247,7 @@ public class ChatServiceImpl implements ChatService {
         return result;
     }
 
-    private String getFileBase64(Long id, String nameFile, String type) {
-        return minioService.getFile(type + id, nameFile);
+    private String getUrlFiles(Long id, String nameFile, String type) {
+        return minioService.getUrlFiles(type + id, nameFile);
     }
 }

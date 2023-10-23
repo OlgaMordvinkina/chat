@@ -21,6 +21,7 @@ public class UserEntity {
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "password_id", referencedColumnName = "id", nullable = false)
     private PasswordEntity password;
+    @Column(name = "user_role")
     @Enumerated(value = EnumType.STRING)
     private Role role;
 }

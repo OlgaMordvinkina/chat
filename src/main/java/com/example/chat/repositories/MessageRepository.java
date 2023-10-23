@@ -59,9 +59,7 @@ public interface MessageRepository extends JpaRepository<MessageEntity, Long> {
 
     @Modifying
     @Query(value = "UPDATE messages " +
-            "SET reply_message = 0 " +
-            "WHERE reply_message=:messageId ", nativeQuery = true)
+            "SET reply_message_id = 0 " +
+            "WHERE reply_message_id=:messageId ", nativeQuery = true)
     void updateReplyMessage(@Param("messageId") Long messageId);
-
-    int countByChat_Id(Long chatId);
 }
