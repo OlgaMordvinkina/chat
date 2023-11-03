@@ -1,5 +1,6 @@
 package com.example.chat.services;
 
+import com.example.chat.dto.AttachmentDto;
 import com.example.chat.dto.ChatDto;
 import com.example.chat.dto.ChatFullDto;
 import com.example.chat.dto.ChatPreviewDto;
@@ -20,6 +21,8 @@ public interface ChatService {
     List<ChatPreviewDto> getChatPreviews(Long userId);
 
     ChatFullDto getChat(Long userId, Long chatId);
+
+    List<AttachmentDto> getAttachmentsChat(Long userId, Long chatId, int page, int size);
 
     ChatEntity getChatById(Long chatId);
 

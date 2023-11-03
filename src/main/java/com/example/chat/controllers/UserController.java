@@ -59,20 +59,20 @@ public class UserController {
     @PutMapping("/users/{userId}")
     public UserDto updateUser(@PathVariable Long userId,
                               @RequestBody UserRegisterDto updateUser) {
-        log.info("PUT /users/registration/{userId} request received");
+        log.info("PUT /users/registration/" + userId + " request received");
         return service.updateUser(userId, updateUser);
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/users/{userId}")
     public void deleteUser(@PathVariable Long userId, Long deletedUserId) {
-        log.info("DELETE /users/registration/{userId} request received");
+        log.info("DELETE /users/registration/" + userId + " request received");
         service.deleteUserById(userId, deletedUserId);
     }
 
     @GetMapping("/users/{userId}/search")
     public List<UserFullDto> searchUser(@PathVariable Long userId, @Valid @NotBlank @RequestParam String desired) {
-        log.info("GET /users/{userId}/search request received");
+        log.info("GET /users/" + userId + "/search request received");
         return service.searchUser(userId, desired);
     }
 

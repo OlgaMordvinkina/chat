@@ -16,6 +16,9 @@ import com.example.chat.repositories.MessageRepository;
 import com.example.chat.services.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,7 +47,7 @@ public class MessageServiceImpl implements MessageService {
     public MessageDto createMessage(Long userId, Long chatId, MessageDto newMessage) {
         ProfileEntity sender = profileService.findProfileByUserId(userId);
         ChatEntity chat = chatService.getChatById(chatId);
-        extendParticipant(userId, chat.getParticipants());
+        isParticipant(userId, chat.getParticipants());
 
         newMessage.setState(StateMessage.SENT);
 
@@ -55,36 +58,34 @@ public class MessageServiceImpl implements MessageService {
                 ? getMessageById(newMessage.getReplyMessage().getId())
                 : null;
 
-        List<MessageEntity> forwardFrom = newMessage.getForwardFrom() != null
-                ? messageRepository.findAllByIdInOrderById(newMessage.getForwardFrom().stream().map(MessageDto::getId).collect(Collectors.toSet()))
+        List<MessageEntity> forwardFrom = newMessage.getForwardedFrom() != null
+                ? messageRepository.findAllByIdInOrderById(newMessage.getForwardedFrom().stream().map(MessageDto::getId).collect(Collectors.toSet()))
                 : null;
 
         MessageEntity message = messageMapper.toMessageEntity(newMessage, sender, chat, replyMessageId, forwardFrom);
 
+        List<AttachmentEntity> attachments = new ArrayList<>();
         if (newMessage.getAttachments() != null) {
-            List<AttachmentEntity> attachments = new ArrayList<>();
             newMessage.getAttachments().forEach(attachment -> {
+                var attachmentEntity = AttachmentEntity.builder();
                 String nameAttachment = minioService.putFile(TypeBucket.attachmentschat.name() + chatId.toString(), attachment.getFile());
-                AttachmentEntity attachmentEntity = new AttachmentEntity();
-                attachmentEntity.setNameFile(nameAttachment);
-                attachments.add(attachmentEntity);
-                attachmentRepository.save(attachmentEntity);
+                attachmentEntity.nameFile(nameAttachment);
+                attachments.add(attachmentRepository.save(attachmentEntity.build()));
             });
             message.setAttachments(attachments);
         }
 
-        MessageEntity saveMessage = messageRepository.save(message);
-        return messageMapper.toMessageDto(saveMessage, newMessage.getAttachments());
+        return messageMapper.toMessageDto(messageRepository.save(message), newMessage.getAttachments());
     }
 
     @Override
     public MessageDto updateMessage(MessageDto updateMessage) {
         userService.existUserById(updateMessage.getSender().getUserId());
         ChatEntity chat = chatService.getChatById(updateMessage.getChat().getId());
-        extendParticipant(updateMessage.getSender().getUserId(), chat.getParticipants());
+        isParticipant(updateMessage.getSender().getUserId(), chat.getParticipants());
 
         MessageEntity oldMessage = getMessageById(updateMessage.getId());
-        extendSender(oldMessage.getSender().getId(), updateMessage.getSender().getUserId());
+        isSender(oldMessage.getSender().getId(), updateMessage.getSender().getUserId());
 
         oldMessage.setText(updateMessage.getText());
 
@@ -99,8 +100,12 @@ public class MessageServiceImpl implements MessageService {
         chatService.existChatById(chatId);
         MessageEntity oldMessage = getMessageById(messageId);
 
-        extendSender(oldMessage.getSender().getId(), userId);
-        oldMessage.getAttachments().forEach(it -> minioService.removeFile(TypeBucket.attachmentschat.name() + chatId, it.getNameFile()));
+        isSender(oldMessage.getSender().getId(), userId);
+
+        if (oldMessage.getAttachments() != null) {
+            oldMessage.getAttachments().forEach(it -> minioService.removeFile(TypeBucket.attachmentschat.name() + chatId, it.getNameFile()));
+        }
+
         messageRepository.updateReplyMessage(messageId);
         messageRepository.deleteById(messageId);
         return messageMapper.toMessageDto(oldMessage, null);
@@ -108,13 +113,19 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<MessageDto> getMessages(Long userId, Long chatId) {
+    public List<MessageDto> getMessages(Long userId, Long chatId, int page, int size) {
         userService.existUserById(userId);
         ChatEntity chat = chatService.getChatById(chatId);
-        extendParticipant(userId, chat.getParticipants());
+        isParticipant(userId, chat.getParticipants());
 
-        List<MessageEntity> messages = messageRepository.findAllByChat_IdOrderById(chatId);
-        return toListMessageDto(chatId, messages);
+        int pageNumber = page - 1;
+        Pageable pages = PageRequest.of(pageNumber, size, Sort.by(Sort.Direction.DESC, "id"));
+        List<MessageDto> messages = toListMessageDto(chatId, messageRepository.findAllByChat_Id(chatId, pages));
+        messages.forEach(message -> {
+            String photo = message.getSender().getPhoto();
+            message.getSender().setPhoto(photo != null ? minioService.getUrlFiles(TypeBucket.user.name() + message.getSender().getId(), photo) : null);
+        });
+        return messages;
     }
 
     @Override
@@ -147,44 +158,48 @@ public class MessageServiceImpl implements MessageService {
         return toListMessageDto(chatId, messages);
     }
 
+    @Override
+    public ChatEntity updateStateMessages(Long userId, Long chatId) {
+        userService.existUserById(userId);
+        ChatEntity chat = chatService.getChatById(chatId);
+        isParticipant(userId, chat.getParticipants());
+        messageRepository.updateStateMessage(chatId, userId);
+        return chat;
+    }
+
     @Transactional(readOnly = true)
-    public MessageEntity getMessageById(Long messageId) {
+    private MessageEntity getMessageById(Long messageId) {
         return messageRepository.findById(messageId).orElseThrow(() ->
                 new NotFoundObjectException("Message with ID=" + messageId + " does not exist."));
     }
 
-    private void extendSender(Long senderId, Long userId) {
+    private void isSender(Long senderId, Long userId) {
         if (!senderId.equals(userId)) {
             throw new AccessException("No rights to edit this post");
         }
     }
 
-    private void extendParticipant(Long userId, Set<ParticipantEntity> participants) {
+    private void isParticipant(Long userId, Set<ParticipantEntity> participants) {
         if (participants != null && participants.stream()
                 .noneMatch(it -> it.getKey().getUser().getId().equals(userId))) {
             throw new AccessException("No rights to write to this chat");
         }
     }
 
-    @Override
-    public ChatEntity updateStateMessages(Long userId, Long chatId) {
-        userService.existUserById(userId);
-        ChatEntity chat = chatService.getChatById(chatId);
-        extendParticipant(userId, chat.getParticipants());
-        messageRepository.updateStateMessage(chatId, userId);
-        return chat;
-    }
-
     private List<MessageDto> toListMessageDto(Long chatId, List<MessageEntity> messages) {
         List<MessageDto> msg = messages.stream()
-                .map(message -> messageMapper.toMessageDto(message, message.getAttachments().stream().map(attachmentMapper::toAttachmentDto).toList()))
+                .map(message -> {
+                    List<AttachmentDto> attachmentDtos = message.getAttachments() != null ?
+                            message.getAttachments().stream().map(attachmentMapper::toAttachmentDto).toList() :
+                            List.of();
+                    return messageMapper.toMessageDto(message, attachmentDtos);
+                })
                 .toList();
 
         msg.forEach(message -> {
                     List<AttachmentDto> attachments = new ArrayList<>();
-
                     message.getAttachments().forEach(attachment -> {
-                        String fileBase64 = "data:image/png;base64," + minioService.getFile(TypeBucket.attachmentschat.name() + chatId, attachment.getFile());
+                        String fileBase64 = minioService.getUrlFiles(TypeBucket.attachmentschat.name() + chatId, attachment.getFile());
                         attachments.add(new AttachmentDto(attachment.getId(), fileBase64));
                     });
 

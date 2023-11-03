@@ -20,9 +20,13 @@ public class ChatEntity {
     private Long id;
     private String title;
     private String photo;
+
+    @Column(name = "chat_type")
     @Enumerated(value = EnumType.STRING)
     private Availability type;
+
     @OneToMany(fetch = FetchType.LAZY)
     @JoinColumn(name = "chat_id")
+    @ToString.Exclude
     private Set<ParticipantEntity> participants;
 }

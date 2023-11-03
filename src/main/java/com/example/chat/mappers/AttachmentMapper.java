@@ -7,9 +7,10 @@ import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
 public interface AttachmentMapper {
-    @Mapping(target = "file", source = "nameFile")
+    @Mapping(target = "file", source = "entity.nameFile")
     AttachmentDto toAttachmentDto(AttachmentEntity entity);
 
-    @Mapping(target = "nameFile", source = "file")
+    @Mapping(target = "nameFile", source = "dto.file")
+    @Mapping(target = "messageId", ignore = true)
     AttachmentEntity toAttachmentEntity(AttachmentDto dto);
 }

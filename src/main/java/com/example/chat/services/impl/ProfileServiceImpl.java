@@ -71,7 +71,7 @@ public class ProfileServiceImpl implements ProfileService {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         profile.setOnlineDate(LocalDateTime.parse(LocalDateTime.now().format(formatter), formatter));
         ProfileDto profileDto = profileMapper.toProfileDto(profileRepository.save(profile));
-        profileDto.setPhoto(getFileBase64(userId, profileDto));
+        profileDto.setPhoto(getUrlFiles(userId, profileDto));
         return profileDto;
     }
 
@@ -79,13 +79,13 @@ public class ProfileServiceImpl implements ProfileService {
     public ProfileDto getProfileByUserId(Long userId) {
         ProfileDto profileDto = profileMapper.toProfileDto(findProfileByUserId(userId));
         if (profileDto.getPhoto() != null) {
-            profileDto.setPhoto(getFileBase64(userId, profileDto));
+            profileDto.setPhoto(getUrlFiles(userId, profileDto));
         }
         return profileDto;
     }
 
-    private String getFileBase64(Long userId, ProfileDto profileDto) {
-        return "data:image/jpg;base64," + minioService.getFile(TypeBucket.user.name() + userId, profileDto.getPhoto());
+    private String getUrlFiles(Long userId, ProfileDto profileDto) {
+        return minioService.getUrlFiles(TypeBucket.user.name() + userId, profileDto.getPhoto());
     }
 
     @Override

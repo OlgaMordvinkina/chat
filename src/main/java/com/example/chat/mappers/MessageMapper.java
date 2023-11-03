@@ -16,11 +16,20 @@ import java.util.stream.Collectors;
 
 @Mapper(componentModel = "spring")
 public interface MessageMapper {
+    @Named("participants")
+    static Set<Long> getParticipantsIds(Set<ParticipantEntity> participants) {
+        return participants != null
+                ? participants.stream()
+                .map(participant -> participant.getKey().getUser().getId())
+                .collect(Collectors.toSet())
+                : null;
+    }
+
     @Mapping(target = "sender", source = "entity.sender")
     @Mapping(target = "sender.userId", source = "entity.sender.user.id")
     @Mapping(target = "chat", source = "entity.chat")
     @Mapping(target = "replyMessage", expression = "java(toMessageDto(entity.getReplyMessage(), null))")
-    @Mapping(target = "forwardFrom", source = "entity.forwardFrom", qualifiedByName = "forwardFrom")
+    @Mapping(target = "forwardedFrom", source = "entity.forwardedFrom", qualifiedByName = "forwardedFrom")
     @Mapping(target = "chat.participants", source = "entity.chat.participants", qualifiedByName = "participants")
     @Mapping(target = "typeMessage", expression = "java(null)")
     @Mapping(target = "attachments", source = "attachments")
@@ -30,24 +39,15 @@ public interface MessageMapper {
     @Mapping(target = "sender.userId", source = "entity.sender.user.id")
     @Mapping(target = "chat", source = "entity.chat")
     @Mapping(target = "replyMessage", expression = "java(toMessageDto(entity.getReplyMessage(), null))")
-    @Mapping(target = "forwardFrom", source = "entity.forwardFrom", qualifiedByName = "forwardFrom")
+    @Mapping(target = "forwardedFrom", source = "entity.forwardedFrom", qualifiedByName = "forwardedFrom")
     @Mapping(target = "chat.participants", source = "entity.chat.participants", qualifiedByName = "participants")
     @Mapping(target = "typeMessage", expression = "java(null)")
     MessageDto toMessageDto(MessageEntity entity);
 
-    @Named("forwardFrom")
-    default List<MessageDto> getForwardFrom(List<MessageEntity> forwardFrom) {
-        return forwardFrom != null
-                ? forwardFrom.stream().map(message -> toMessageDto(message, null)).collect(Collectors.toList())
-                : null;
-    }
-
-    @Named("participants")
-    static Set<Long> getParticipantsIds(Set<ParticipantEntity> participants) {
-        return participants != null
-                ? participants.stream()
-                .map(participant -> participant.getKey().getUser().getId())
-                .collect(Collectors.toSet())
+    @Named("forwardedFrom")
+    default List<MessageDto> getForwardedFrom(List<MessageEntity> forwardedFrom) {
+        return forwardedFrom != null
+                ? forwardedFrom.stream().map(message -> toMessageDto(message, null)).collect(Collectors.toList())
                 : null;
     }
 
@@ -58,8 +58,8 @@ public interface MessageMapper {
     @Mapping(target = "sender", source = "sender")
     @Mapping(target = "chat", source = "chat")
     @Mapping(target = "replyMessage", source = "replyMessage")
-    @Mapping(target = "forwardFrom", source = "forwardFrom")
+    @Mapping(target = "forwardedFrom", source = "forwardedFrom")
     @Mapping(target = "attachments", expression = "java(null)")
     MessageEntity toMessageEntity(MessageDto dto, ProfileEntity sender, ChatEntity chat, MessageEntity replyMessage,
-                                  List<MessageEntity> forwardFrom);
+                                  List<MessageEntity> forwardedFrom);
 }

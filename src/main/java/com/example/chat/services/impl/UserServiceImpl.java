@@ -23,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @Transactional
@@ -111,23 +112,19 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    private List<UserFullDto> convertToUserFullDto(String[] source) {
+    private List<UserFullDto> convertToUserFullDto(List<Map<String, Object>> source) {
         List<UserFullDto> result = new ArrayList<>();
 
         var userFull = UserFullDto.builder();
-        for (String element : source) {
-            String[] chatPreview = element.split(",");
-
-            long userId = Long.parseLong(chatPreview[0]);
+        for (Map<String, Object> element : source) {
+            long userId = Long.parseLong(element.get("id").toString());
             userFull.id(userId);
-            userFull.fullName(chatPreview[1] + " " + chatPreview[2]);
-            userFull.email(chatPreview[3]);
-            String photo = chatPreview[4];
-            if (!photo.equals("null")) {
-                String file = minioService.getFile(TypeBucket.user.name() + userId, photo);
-                if (file != null) {
-                    userFull.photo("data:image/jpg;base64," + file);
-                }
+            userFull.fullName(element.get("surname").toString() + " " + element.get("name").toString());
+            userFull.email(element.get("email").toString());
+            String photo = element.get("photo") != null ? element.get("photo").toString() : null;
+            if (photo != null) {
+                String file = minioService.getUrlFiles(TypeBucket.user.name() + userId, photo);
+                userFull.photo(file);
             } else {
                 userFull.photo(null);
             }

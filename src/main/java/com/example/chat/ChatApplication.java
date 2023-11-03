@@ -8,14 +8,14 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class ChatApplication {
     private static Initializer initializer;
 
-    @Autowired
-    public void setInitialLoader(Initializer initiator) {
-        ChatApplication.initializer = initiator;
-    }
-
     public static void main(String[] args) {
         SpringApplication.run(ChatApplication.class, args);
         initializer.initial();
+    }
+
+    @Autowired
+    public void setInitialLoader(Initializer initiator) {
+        ChatApplication.initializer = initiator;
     }
 
 }

@@ -3,18 +3,16 @@ package com.example.chat.services.impl;
 import com.example.chat.services.MinioService;
 import io.minio.*;
 import io.minio.errors.MinioException;
+import io.minio.http.Method;
 import io.minio.messages.Item;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.compress.utils.IOUtils;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Base64;
-import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -91,40 +89,16 @@ public class MinioServiceImpl implements MinioService {
 
     @Override
     @SneakyThrows
-    public String getFile(String nameBucket, String nameFile) {
-        if (nameFile != null) {
-            try (InputStream stream =
-                         minioClient.getObject(GetObjectArgs
-                                 .builder()
-                                 .bucket(nameBucket)
-                                 .object(nameFile)
-                                 .build())) {
-                byte[] fileBytes = IOUtils.toByteArray(stream);
-                return Base64.getEncoder().encodeToString(fileBytes);
-            } catch (MinioException e) {
-                e.getStackTrace();
-                return null;
-            }
+    public String getUrlFiles(String nameBucket, String nameFile) {
+        if (nameBucket != null && nameFile != null) {
+            int oneHourInSeconds = 3600;
+            return minioClient.getPresignedObjectUrl(GetPresignedObjectUrlArgs.builder()
+                    .bucket(nameBucket)
+                    .object(nameFile)
+                    .expiry(oneHourInSeconds)
+                    .method(Method.GET)
+                    .build());
         }
         return null;
-    }
-
-    @Override
-    @SneakyThrows
-    public List<String> getFiles(String nameBucket) {
-        List<String> images = new ArrayList<>();
-        try {
-            Iterable<Result<Item>> results = minioClient.listObjects(ListObjectsArgs.builder().bucket(nameBucket).build());
-            for (Result<Item> result : results) {
-                try (InputStream stream = minioClient.getObject(GetObjectArgs.builder().bucket(nameBucket).object(result.get().objectName()).build())) {
-                    byte[] fileBytes = IOUtils.toByteArray(stream);
-                    String base64Image = Base64.getEncoder().encodeToString(fileBytes);
-                    images.add("data:image/jpg;base64," + base64Image);
-                }
-            }
-        } catch (MinioException e) {
-            return images;
-        }
-        return images;
     }
 }

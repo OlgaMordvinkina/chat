@@ -1,0 +1,48 @@
+version: '3.8'
+services:
+  chat:
+    image: chat:latest
+    container_name: chat_container
+    ports:
+      - "8080:8080"
+    depends_on:
+      - minio
+      - db
+    environment:
+      - JAVA_OPTIONS=-Dspring.profiles.active=docker
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/chat
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=1234
+      - MINIO_ENDPOINT=http://minio:9000
+      - MINIO_ACCESS_KEY=minioadmin
+      - MINIO_SECRET_KEY=minioadmin
+
+  minio:
+    image: minio/minio:latest
+    container_name: minio_container
+    volumes:
+      - ./minio_storage/data:/data
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      - MINIO_ROOT_USER=minioadmin
+      - MINIO_ROOT_PASSWORD=minioadmin
+      - MINIO_BROWSER=on
+      - MINIO_DOMAIN=minio
+    command: server /data --console-address ":9001"
+
+  db:
+    image: postgres:13.7-alpine
+    container_name: postgres_db
+    ports:
+      - "6541:5432"
+    environment:
+      - POSTGRES_DB=chat
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=1234
+
+  web-app:
+    image: web-app
+    ports:
+      - 82:80

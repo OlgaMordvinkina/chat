@@ -35,11 +35,18 @@ dependencies {
 	implementation 'org.postgresql:postgresql:42.2.27'
 	implementation 'javax.validation:validation-api:2.0.1.Final'
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0'
-//	implementation 'org.springframework.boot:spring-boot-starter-websocket'
 	implementation 'org.springframework:spring-websocket'
 	implementation 'org.springframework:spring-messaging'
 	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
 	implementation 'io.minio:minio:8.5.2'
+	implementation 'org.flywaydb:flyway-core'
+	testImplementation 'org.postgresql:postgresql:42.2.27'
+	testImplementation "org.testcontainers:postgresql:1.17.6"
+	testImplementation "org.testcontainers:junit-jupiter:1.17.6"
+	testImplementation 'org.springframework.security:spring-security-test'
+	testImplementation 'org.projectlombok:lombok'
+	implementation 'commons-codec:commons-codec:1.15'
+	implementation group: 'commons-io', name: 'commons-io', version: '2.11.0'
 }
 
 tasks.named('test') {

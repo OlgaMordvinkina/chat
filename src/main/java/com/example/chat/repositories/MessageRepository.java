@@ -3,6 +3,7 @@ package com.example.chat.repositories;
 import com.example.chat.dto.enums.StateMessage;
 import com.example.chat.entities.MessageEntity;
 import jakarta.persistence.OrderBy;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -14,7 +15,7 @@ import java.util.Set;
 
 @Repository
 public interface MessageRepository extends JpaRepository<MessageEntity, Long> {
-    List<MessageEntity> findAllByChat_IdOrderById(Long chatId);
+    List<MessageEntity> findAllByChat_Id(Long chatId, Pageable pageable);
 
     @OrderBy("createDate ASC")
     List<MessageEntity> findAllByIdInOrderById(Set<Long> ids);
@@ -26,7 +27,8 @@ public interface MessageRepository extends JpaRepository<MessageEntity, Long> {
             "JOIN pr.key.user p " +
             "WHERE p.user.id=:userId " +
             "AND lower(m.text) LIKE lower(CONCAT('%', :desired, '%'))")
-    List<MessageEntity> searchMessagesAllChats(Long userId, String desired);
+    List<MessageEntity> searchMessagesAllChats(@Param("userId") Long userId,
+                                               @Param("desired") String desired);
 
     @Query("SELECT m " +
             "FROM MessageEntity m " +
@@ -35,7 +37,9 @@ public interface MessageRepository extends JpaRepository<MessageEntity, Long> {
             "JOIN pr.key.user p " +
             "WHERE p.user.id=:userId AND c.id=:chatId " +
             "AND lower(m.text) LIKE lower(CONCAT('%', :desired, '%'))")
-    List<MessageEntity> searchMessagesThisChat(Long userId, Long chatId, String desired);
+    List<MessageEntity> searchMessagesThisChat(@Param("userId") Long userId,
+                                               @Param("chatId") Long chatId,
+                                               @Param("desired") String desired);
 
     void deleteByChatId(Long chatId);
 
@@ -47,18 +51,19 @@ public interface MessageRepository extends JpaRepository<MessageEntity, Long> {
             "WHERE chat_id=:chatId " +
             "AND sender_id!=:userId " +
             "AND state = 'SENT'", nativeQuery = true)
-    void updateStateMessage(@Param("chatId") Long chatId, @Param("userId") Long userId);
+    void updateStateMessage(@Param("chatId") Long chatId,
+                            @Param("userId") Long userId);
 
     @Query("SELECT m " +
             "FROM MessageEntity m " +
             "WHERE m.chat.id = :chatId " +
             "ORDER BY m.createDate DESC " +
             "LIMIT 1")
-    MessageEntity findLastByChatId(Long chatId);
+    MessageEntity findLastByChatId(@Param("chatId") Long chatId);
 
     @Modifying
     @Query(value = "UPDATE messages " +
-            "SET reply_message = 0 " +
-            "WHERE reply_message=:messageId ", nativeQuery = true)
+            "SET reply_message_id = 0 " +
+            "WHERE reply_message_id=:messageId ", nativeQuery = true)
     void updateReplyMessage(@Param("messageId") Long messageId);
 }

@@ -4,16 +4,18 @@ import io.minio.MinioClient;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+
+import javax.sql.DataSource;
 
 @Configuration
 public class AppConfig {
-    @Value("${MINIO_ENDPOINT}")
+    @Value("${minio_endpoint}")
     private String endpoint;
-    @Value("${MINIO_ACCESS_KEY}")
+    @Value("${minio_access_key}")
     private String accessKey;
-    @Value("${MINIO_SECRET_KEY}")
+    @Value("${minio_secret_key}")
     private String secretKey;
-
 
     @Bean
     public MinioClient minioClient() {
@@ -21,5 +23,10 @@ public class AppConfig {
                 .endpoint(endpoint)
                 .credentials(accessKey, secretKey)
                 .build();
+    }
+
+    @Bean
+    public NamedParameterJdbcTemplate namedJdbcTemplate(DataSource dataSource) {
+        return new NamedParameterJdbcTemplate(dataSource);
     }
 }
