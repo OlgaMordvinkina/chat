@@ -121,7 +121,7 @@ public class UserServiceImpl implements UserService {
             userFull.id(userId);
             userFull.fullName(element.get("surname").toString() + " " + element.get("name").toString());
             userFull.email(element.get("email").toString());
-            String photo = element.get("photo").toString();
+            String photo = element.get("photo") != null ? element.get("photo").toString() : null;
             if (photo != null) {
                 String file = minioService.getUrlFiles(TypeBucket.user.name() + userId, photo);
                 userFull.photo(file);

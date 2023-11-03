@@ -101,7 +101,11 @@ public class MessageServiceImpl implements MessageService {
         MessageEntity oldMessage = getMessageById(messageId);
 
         isSender(oldMessage.getSender().getId(), userId);
-        oldMessage.getAttachments().forEach(it -> minioService.removeFile(TypeBucket.attachmentschat.name() + chatId, it.getNameFile()));
+
+        if (oldMessage.getAttachments() != null) {
+            oldMessage.getAttachments().forEach(it -> minioService.removeFile(TypeBucket.attachmentschat.name() + chatId, it.getNameFile()));
+        }
+
         messageRepository.updateReplyMessage(messageId);
         messageRepository.deleteById(messageId);
         return messageMapper.toMessageDto(oldMessage, null);
@@ -154,12 +158,6 @@ public class MessageServiceImpl implements MessageService {
         return toListMessageDto(chatId, messages);
     }
 
-    @Transactional(readOnly = true)
-    public MessageEntity getMessageById(Long messageId) {
-        return messageRepository.findById(messageId).orElseThrow(() ->
-                new NotFoundObjectException("Message with ID=" + messageId + " does not exist."));
-    }
-
     @Override
     public ChatEntity updateStateMessages(Long userId, Long chatId) {
         userService.existUserById(userId);
@@ -167,6 +165,12 @@ public class MessageServiceImpl implements MessageService {
         isParticipant(userId, chat.getParticipants());
         messageRepository.updateStateMessage(chatId, userId);
         return chat;
+    }
+
+    @Transactional(readOnly = true)
+    private MessageEntity getMessageById(Long messageId) {
+        return messageRepository.findById(messageId).orElseThrow(() ->
+                new NotFoundObjectException("Message with ID=" + messageId + " does not exist."));
     }
 
     private void isSender(Long senderId, Long userId) {
@@ -184,7 +188,12 @@ public class MessageServiceImpl implements MessageService {
 
     private List<MessageDto> toListMessageDto(Long chatId, List<MessageEntity> messages) {
         List<MessageDto> msg = messages.stream()
-                .map(message -> messageMapper.toMessageDto(message, message.getAttachments().stream().map(attachmentMapper::toAttachmentDto).toList()))
+                .map(message -> {
+                    List<AttachmentDto> attachmentDtos = message.getAttachments() != null ?
+                            message.getAttachments().stream().map(attachmentMapper::toAttachmentDto).toList() :
+                            List.of();
+                    return messageMapper.toMessageDto(message, attachmentDtos);
+                })
                 .toList();
 
         msg.forEach(message -> {

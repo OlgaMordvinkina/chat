@@ -120,7 +120,28 @@ public class ChatServiceImpl implements ChatService {
     @Override
     public List<ChatPreviewDto> getChatPreviews(Long userId) {
         userService.existUserById(userId);
-        return convertToChatPreviewDto(chatRepository.getReviews(userId, userId));
+        List<ChatPreviewDto> previews = chatRepository.getReviews(userId);
+        previews.forEach(preview -> {
+
+            String photo = preview.getPhoto();
+            if (photo != null) {
+                Long companionId = preview.getCompanionId();
+                preview.setPhoto(
+                        companionId != null ?
+                                getUrlFiles(companionId, photo, TypeBucket.user.name()) :
+                                getUrlFiles(preview.getChatId(), photo, TypeBucket.chat.name())
+                );
+            }
+
+            Long senderId = preview.getSenderId();
+            if (senderId != null) {
+                preview.setUnreadMessages(messageRepository.countByChat_IdAndStateAndSender_Id(
+                        preview.getChatId(),
+                        StateMessage.SENT,
+                        senderId));
+            }
+        });
+        return previews;
     }
 
     @Override
@@ -188,63 +209,6 @@ public class ChatServiceImpl implements ChatService {
         if (!chatRepository.existsById(chatId)) {
             throw new NotFoundObjectException("Chat with ID=" + chatId + " does not exist.");
         }
-    }
-
-    private List<ChatPreviewDto> convertToChatPreviewDto(List<Map<String, Object>> source) {
-        List<ChatPreviewDto> result = new ArrayList<>();
-        var preview = ChatPreviewDto.builder();
-        for (Map<String, Object> element : source) {
-            long chatId = Long.parseLong(element.get("chatId").toString());
-            preview.chatId(chatId);
-            preview.messageId(!Objects.equals(element.get("messageId"), null) ? Long.parseLong(element.get("messageId").toString()) : null);
-            preview.title(element.get("title").toString());
-            Long senderId = !Objects.equals(element.get("senderId"), null) ? Long.parseLong(element.get("senderId").toString()) : null;
-            preview.senderId(senderId);
-
-            if (!Objects.equals(element.get("dateLastMessage"), null)) {
-                DateTimeFormatter formatter = new DateTimeFormatterBuilder()
-                        .appendPattern("yyyy-MM-dd HH:mm:ss")
-                        .appendFraction(ChronoField.MILLI_OF_SECOND, 1, 6, true)
-                        .toFormatter();
-                LocalDateTime dateLastMessage = LocalDateTime.parse(element.get("dateLastMessage").toString(), formatter);
-
-                LocalDate currentDate = LocalDate.now();
-                if (dateLastMessage.toLocalDate().isEqual(currentDate)) {
-                    preview.dateLastMessage(String.format("%02d:%02d:%d", dateLastMessage.getHour(), dateLastMessage.getMinute(), dateLastMessage.getSecond()));
-                } else {
-                    preview.dateLastMessage(String.format("%02d.%02d.%d", dateLastMessage.getDayOfMonth(), dateLastMessage.getMonthValue(), dateLastMessage.getYear()));
-                }
-            } else {
-                preview.dateLastMessage("");
-            }
-            preview.stateMessage(!Objects.equals(element.get("stateMessage"), null) ? StateMessage.valueOf(element.get("stateMessage").toString()) : null);
-
-            Long companionId = !Objects.equals(element.get("companionId"), null) ? Long.valueOf(element.get("companionId").toString()) : null;
-            preview.companionId(companionId);
-
-            String nameFile = Objects.equals(element.get("nameFile"), null) ? null : element.get("nameFile").toString();
-            if (nameFile != null) {
-                preview.photo(
-                        companionId != null ?
-                                getUrlFiles(companionId, nameFile, TypeBucket.user.name()) :
-                                getUrlFiles(chatId, nameFile, TypeBucket.chat.name())
-                );
-            } else {
-                preview.photo(null);
-            }
-
-
-            String lastMessage = element.get("text").toString();
-            preview.lastMessage(lastMessage);
-
-            if (senderId != null) {
-                preview.unreadMessages(messageRepository.countByChat_IdAndStateAndSender_Id(chatId, StateMessage.SENT, senderId));
-            } else {
-                preview.unreadMessages(0L);
-            }
-            result.add(preview.build());
-        }
-        return result;
     }
 
     private String getUrlFiles(Long id, String nameFile, String type) {

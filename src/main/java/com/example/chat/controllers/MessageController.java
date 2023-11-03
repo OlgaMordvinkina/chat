@@ -21,7 +21,6 @@ import javax.validation.constraints.Positive;
 import java.util.List;
 import java.util.Objects;
 
-@SuppressWarnings("checkstyle:Regexp")
 @Slf4j
 @Validated
 @RestController
@@ -36,6 +35,7 @@ public class MessageController {
     public MessageDto createMessage(@PathVariable Long userId,
                                     @PathVariable Long chatId,
                                     @RequestBody MessageDto newMessage) {
+        String.format("");
         log.info("POST /users/" + userId + "/chats/" + chatId + "/messages request received");
         MessageDto createdMessage = service.createMessage(userId, chatId, newMessage);
 
@@ -97,7 +97,7 @@ public class MessageController {
                                             @NotBlank
                                             @Pattern(regexp = "^\\S*$")
                                             @RequestParam String desired) throws IllegalAccessException {
-        log.debug("GET /users/" + userId + "/chats/messages/search request received");
+        log.debug("GET /users/" + userId + "/chats/messages/search?desired= " + desired + " request received");
         return service.searchMessagesChats(userId, null, desired, TypeSearch.ALL_CHATS);
     }
 
@@ -110,7 +110,7 @@ public class MessageController {
                                             @NotBlank
                                             @Pattern(regexp = "^\\S*$")
                                             @RequestParam String desired) throws IllegalAccessException {
-        log.debug("GET /users/" + userId + "/chats/" + chatId + "/messages/search request received");
+        log.debug("GET /users/" + userId + "/chats/" + chatId + "/messages/search?desired=" + desired + " request received");
         return service.searchMessagesChats(userId, chatId, desired, TypeSearch.THIS_CHAT);
     }
 

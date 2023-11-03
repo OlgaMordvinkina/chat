@@ -27,7 +27,8 @@ public interface MessageRepository extends JpaRepository<MessageEntity, Long> {
             "JOIN pr.key.user p " +
             "WHERE p.user.id=:userId " +
             "AND lower(m.text) LIKE lower(CONCAT('%', :desired, '%'))")
-    List<MessageEntity> searchMessagesAllChats(Long userId, String desired);
+    List<MessageEntity> searchMessagesAllChats(@Param("userId") Long userId,
+                                               @Param("desired") String desired);
 
     @Query("SELECT m " +
             "FROM MessageEntity m " +
@@ -36,7 +37,9 @@ public interface MessageRepository extends JpaRepository<MessageEntity, Long> {
             "JOIN pr.key.user p " +
             "WHERE p.user.id=:userId AND c.id=:chatId " +
             "AND lower(m.text) LIKE lower(CONCAT('%', :desired, '%'))")
-    List<MessageEntity> searchMessagesThisChat(Long userId, Long chatId, String desired);
+    List<MessageEntity> searchMessagesThisChat(@Param("userId") Long userId,
+                                               @Param("chatId") Long chatId,
+                                               @Param("desired") String desired);
 
     void deleteByChatId(Long chatId);
 
@@ -48,14 +51,15 @@ public interface MessageRepository extends JpaRepository<MessageEntity, Long> {
             "WHERE chat_id=:chatId " +
             "AND sender_id!=:userId " +
             "AND state = 'SENT'", nativeQuery = true)
-    void updateStateMessage(@Param("chatId") Long chatId, @Param("userId") Long userId);
+    void updateStateMessage(@Param("chatId") Long chatId,
+                            @Param("userId") Long userId);
 
     @Query("SELECT m " +
             "FROM MessageEntity m " +
             "WHERE m.chat.id = :chatId " +
             "ORDER BY m.createDate DESC " +
             "LIMIT 1")
-    MessageEntity findLastByChatId(Long chatId);
+    MessageEntity findLastByChatId(@Param("chatId") Long chatId);
 
     @Modifying
     @Query(value = "UPDATE messages " +

@@ -16,6 +16,15 @@ import java.util.stream.Collectors;
 
 @Mapper(componentModel = "spring")
 public interface MessageMapper {
+    @Named("participants")
+    static Set<Long> getParticipantsIds(Set<ParticipantEntity> participants) {
+        return participants != null
+                ? participants.stream()
+                .map(participant -> participant.getKey().getUser().getId())
+                .collect(Collectors.toSet())
+                : null;
+    }
+
     @Mapping(target = "sender", source = "entity.sender")
     @Mapping(target = "sender.userId", source = "entity.sender.user.id")
     @Mapping(target = "chat", source = "entity.chat")
@@ -39,15 +48,6 @@ public interface MessageMapper {
     default List<MessageDto> getForwardedFrom(List<MessageEntity> forwardedFrom) {
         return forwardedFrom != null
                 ? forwardedFrom.stream().map(message -> toMessageDto(message, null)).collect(Collectors.toList())
-                : null;
-    }
-
-    @Named("participants")
-    static Set<Long> getParticipantsIds(Set<ParticipantEntity> participants) {
-        return participants != null
-                ? participants.stream()
-                .map(participant -> participant.getKey().getUser().getId())
-                .collect(Collectors.toSet())
                 : null;
     }
 

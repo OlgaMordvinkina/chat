@@ -3,6 +3,7 @@ package com.example.chat.repositories;
 import com.example.chat.entities.ProfileEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -16,7 +17,7 @@ public interface ProfileRepository extends JpaRepository<ProfileEntity, Long> {
             "FROM ProfileEntity p " +
             "JOIN p.user u " +
             "WHERE u.email=:email")
-    ProfileEntity findByUserEmail(String email);
+    ProfileEntity findByUserEmail(@Param("email") String email);
 
     List<ProfileEntity> findAllByUserIdIn(Set<Long> ids);
 }

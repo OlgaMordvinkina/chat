@@ -42,10 +42,7 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=1234
 
-  frontend:
-    image: chat-frontend:latest
-    container_name: chat_frontend_container
+  web-app:
+    image: web-app
     ports:
-      - "4200:4200"
-    environment:
-      - API_URL=http://chat:8080
+      - 82:80
