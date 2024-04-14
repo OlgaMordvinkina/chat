@@ -5,9 +5,14 @@ import com.example.chat.dto.enums.StateMessage;
 import com.example.chat.repositories.CustomChatRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -19,16 +24,14 @@ import java.util.Objects;
 public class CustomChatRepositoryImpl implements CustomChatRepository {
     @Autowired
     private NamedParameterJdbcTemplate jdbcTemplate;
-
-    @Value("#{T(com.example.chat.utils.ResourceReaderUtils).readFileToString('classpath:getReviews.sql')}")
-    private String getReviewsSql;
+    @Value("classpath:getReviews.sql")
+    private Resource getReviewsSqlResource;
 
     @Override
     public List<ChatPreviewDto> getReviews(Long userId) {
         MapSqlParameterSource parameters = new MapSqlParameterSource();
         parameters.addValue("userId", userId);
-
-        return jdbcTemplate.query(getReviewsSql, parameters,
+        return jdbcTemplate.query(getReviewsSql(), parameters,
                 (rs, rowNum) -> {
                     var preview = ChatPreviewDto.builder();
 
@@ -73,5 +76,20 @@ public class CustomChatRepositoryImpl implements CustomChatRepository {
                     return preview.build();
                 }
         );
+    }
+
+    private String getReviewsSql() {
+        try (InputStream is = getReviewsSqlResource.getInputStream();
+             BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
+            StringBuilder stringBuilder = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                stringBuilder.append(line);
+                stringBuilder.append("\n");
+            }
+            return stringBuilder.toString();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

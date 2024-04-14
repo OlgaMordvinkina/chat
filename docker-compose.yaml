@@ -1,15 +1,17 @@
 version: '3.8'
 services:
   chat:
-    image: chat:latest
+#    image: chat:latest
+    build: .
     container_name: chat_container
     ports:
       - "8080:8080"
+      - "5005:5005"
     depends_on:
       - minio
       - db
     environment:
-      - JAVA_OPTIONS=-Dspring.profiles.active=docker
+      - JAVA_OPTIONS="-Dspring.profiles.active=docker -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/chat
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=1234
@@ -43,6 +45,8 @@ services:
       - POSTGRES_PASSWORD=1234
 
   web-app:
-    image: web-app
+#    image: web-app
+    build: ../chatFront/.
+    container_name: web-app_container
     ports:
       - 82:80

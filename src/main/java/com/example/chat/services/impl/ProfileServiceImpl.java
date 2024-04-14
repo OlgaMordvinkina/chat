@@ -37,6 +37,7 @@ public class ProfileServiceImpl implements ProfileService {
     public UserEntity createProfile(ProfileDto newProfile, UserEntity user) {
         newProfile.setSetting(settingService.getSettingById(1L));
         ProfileEntity profile = profileMapper.toProfileEntity(newProfile);
+        profile.setId(user.getId());
         profile.setUser(user);
         ProfileEntity entity = profileRepository.save(profile);
         return entity.getUser();

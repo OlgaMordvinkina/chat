@@ -50,9 +50,10 @@ public class UserServiceImpl implements UserService {
         PasswordEntity password = new PasswordEntity(newUser.getPassword());
         UserEntity userEntity = userMapper.toUserEntity(user, password);
         ProfileDto profile = profileMapper.toProfileDto(newUser);
-        UserEntity saveUser = profileService.createProfile(profile, userEntity);
+        UserEntity save = userRepository.save(userEntity);
+        profileService.createProfile(profile, save);
 
-        return userMapper.toUserDto(saveUser);
+        return userMapper.toUserDto(save);
     }
 
     @Override
