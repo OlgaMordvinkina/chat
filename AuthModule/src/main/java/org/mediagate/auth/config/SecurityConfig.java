@@ -1,10 +1,10 @@
 package org.mediagate.auth.config;
 
-import org.mediagate.auth.service.UserSecurityService;
 import lombok.RequiredArgsConstructor;
 import org.keycloak.OAuth2Constants;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
+import org.mediagate.auth.service.UserSecurityService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,10 +17,8 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
+public class SecurityConfig {
 
-/**	see also ...WebConfig.java */
-public class SecurityConfig 
-{
 	@Value("${security.swagger.kc_url}")
 	private String kcServerUrl;
 	@Value("${security.swagger.kc_admin.realm}")
@@ -34,31 +32,21 @@ public class SecurityConfig
 
     private final UserSecurityService userDataService;
 
-    //-------------------------------------------------------------------------
-	/** 
+	/**
 	 * 	статические ресурсы размещены в /src/main/webapp/
      */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-                .anonymous(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests	( (request) -> request
-					                        .requestMatchers(	".*", 
-								            					"/web/.*" 	//скрытые файлы - запрещаеем
-								            				).denyAll()
-					                        .requestMatchers(	"/v3/api-docs/**", 
-					                        					"/swagger-ui.html", 
-					                        					"/swagger-ui/**",
-					                        					"/about",	//описание версии и имени приложения, + доп. дисгностическая информация как это видит сервер.
-					                        					"/*.*", 	//файлы корнеого уровня - любые.
-					                        				//	"/*.html",
-					                        				//	"/*.js",
-					                        				//	"/*.css",
-					                        					"/web/**", 	//файлы каталога web - статические ресурсы - тоже любые.
-					                        					"/"
-					                        				).permitAll()
-					                        .anyRequest().authenticated()
-                						)
+		http.anonymous(AbstractHttpConfigurer::disable)
+				.authorizeHttpRequests((request) -> request
+						.requestMatchers(".*", "/web/.*").denyAll()
+						.requestMatchers("/v3/api-docs/**",
+								"/swagger-ui.html",
+								"/swagger-ui/**",
+								"/login/**",
+								"/registration",
+								"/").permitAll()
+						.anyRequest().authenticated())
                 .oauth2ResourceServer((oauth2) -> oauth2
                         .jwt(jwt -> jwt.jwtAuthenticationConverter(new KeycloakJwtAuthenticationConverter()))
                         .bearerTokenResolver(bearerTokenResolver())

@@ -1,9 +1,9 @@
 rootProject.name = 'chat'
 
 include ':CoreModule'
-//include ':AuthModule'
+include ':AuthModule'
 include ':DatabaseModule'
 
-project(':DatabaseModule').projectDir = file('DatabaseModule')
 project(':CoreModule').projectDir = file('CoreModule')
-//project(':AuthModule').projectDir = file('AuthModule')
+project(':DatabaseModule').projectDir = file('DatabaseModule')
+project(':AuthModule').projectDir = file('AuthModule')

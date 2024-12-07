@@ -15,7 +15,7 @@ public interface KeycloakService {
 
     List<GroupRepresentation> getAllGroupsFromKeycloak();
 
-    String getUserRoles(String keycloakUserId);
+    List<String> getUserRoles(String keycloakUserId);
 
-    String getUserGroups(String keycloakUserId);
+    List<String> getUserGroups(String keycloakUserId);
 }

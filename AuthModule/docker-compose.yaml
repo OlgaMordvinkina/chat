@@ -1,0 +1,34 @@
+version: '3.9'
+
+services:
+  keycloak:
+    image: keycloak/keycloak:latest
+    container_name: keycloak-mediagate
+    ports:
+      - "8686:8080" # Проброс порта Keycloak на порт 8686 хост-машины
+    environment:
+      KEYCLOAK_ADMIN: admin          # Администраторская учетная запись
+      KEYCLOAK_ADMIN_PASSWORD: admin # Пароль для администратора
+      KC_DB: postgres                # Используемая база данных
+      KC_DB_URL: jdbc:postgresql://db:5432/keycloak # URL базы данных
+      KC_DB_USERNAME: keycloak       # Имя пользователя для базы данных
+      KC_DB_PASSWORD: keycloak       # Пароль для базы данных
+      KC_HOSTNAME: localhost         # Хостнейм для доступа к Keycloak
+    command: start-dev
+    depends_on:
+      - db
+
+  db:
+    image: postgres:15
+    container_name: postgres-keycloak-mediagate
+    environment:
+      POSTGRES_DB: keycloak          # Имя базы данных
+      POSTGRES_USER: keycloak        # Имя пользователя
+      POSTGRES_PASSWORD: keycloak    # Пароль пользователя
+    ports:
+      - "5636:5432" # Проброс порта Postgres на хост
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

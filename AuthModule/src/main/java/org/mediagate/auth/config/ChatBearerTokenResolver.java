@@ -56,8 +56,8 @@ public final class ChatBearerTokenResolver implements BearerTokenResolver {
     }
 
     /**
-     * Resolve bearer token from request.
-     * If access_token and authorization header is same then return authorization header
+     * Определите маркер доступа из запроса.
+     * Если access_token и заголовок авторизации совпадают, верните заголовок авторизации.
      *
      * @param request the request
      * @return token value

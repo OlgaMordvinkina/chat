@@ -1,0 +1,53 @@
+server.servlet.context-path: /api
+
+spring:
+  hibernate:
+    dialect: org.hibernate.dialect.PostgreSQL10Dialect
+  datasource:
+    driverClassName: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/chat
+    username: postgres
+    password: 1234
+  flyway.enabled: true
+  security:
+    oauth2.resourceserver.jwt.issuer-uri: http://localhost:8686/realms/mediagate
+#    oauth2.resourceserver.jwt.issuer-uri: http://localhost:8686/keycloak/realms/mediagate
+#spring.jpa.hibernate.ddl-auto: validate
+#spring.jpa.hibernate.ddl-auto: create-drop
+
+#spring.jpa.show-sql: true
+#spring.jpa.properties.hibernate.format_sql: true
+#spring.jpa.properties.hibernate.use_sql_comments: true
+#logging.level.org.hibernate.SQL: DEBUG
+#logging.level.org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+#logging.level.org.springframework.security: DEBUG
+
+logging.level.org.springframework.security: DEBUG
+logging.level.org.springframework.security.web.access.ExceptionTranslationFilter: DEBUG
+
+
+minio_endpoint: http://127.0.0.1:9000
+minio_access_key: minioadmin
+minio_secret_key: minioadmin
+#minio.endpoint: ${MINIO_ENDPOINT:http://127.0.0.1:9000}
+#minio.access.key: ${MINIO_ACCESS_KEY:minioadmin}
+#minio.secret.key: ${MINIO_SECRET_KEY:minioadmin}
+
+#postgres.db: ${POSTGRES_DB:chat}
+#postgres.user: ${POSTGRES_USER:postgres}
+#postgres.password: ${POSTGRES_PASSWORD:1234}
+
+security:
+  #claim с идентификатором пользователя, используется для поля email
+  #доступные значения PREFERRED_USERNAME, FIRST_NAME, LAST_NAME, EMAIL, FULL_NAME
+  principal_attribute: PREFERRED_USERNAME
+  #конфигурация swagger для keycloak
+  swagger:
+    kc_url: ${KEYCLOAK_BASE_URL:http://localhost:8686}
+#    realm: ${KEYCLOAK_REALM:master}
+    realm: ${KEYCLOAK_REALM:mediagate}
+    kc_admin:
+      realm: ${KEYCLOAK_ADMIN_REALM:master}
+      client_id: ${KEYCLOAK_ADMIN_CLIENT_ID:admin-cli}
+      login: ${KEYCLOAK_ADMIN_LOGIN:admin}
+      password: ${KEYCLOAK_ADMIN_PASSWORD:admin}

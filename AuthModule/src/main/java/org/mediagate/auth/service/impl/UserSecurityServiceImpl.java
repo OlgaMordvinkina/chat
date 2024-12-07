@@ -7,7 +7,9 @@ import org.mediagate.auth.exceptions.AccessControlExceptionCode;
 import org.mediagate.auth.model.UserInfo;
 import org.mediagate.auth.service.UserSecurityService;
 import org.mediagate.auth.util.KeycloakJwtAttributeName;
+import org.mediagate.db.model.entities.ProfileEntity;
 import org.mediagate.db.model.entities.UserEntity;
+import org.mediagate.db.repositories.ProfileRepository;
 import org.mediagate.db.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +27,7 @@ import java.util.*;
 public class UserSecurityServiceImpl implements UserSecurityService {
 
     private final UserRepository userRepository;
+    private final ProfileRepository profileRepository;
 
 //    private final IGroupDataService groupDataService;
 
@@ -48,7 +51,7 @@ public class UserSecurityServiceImpl implements UserSecurityService {
 //            user.setGlobalRoles_csv(userInfo.getGlobalRoles());
 //            user.setGlobalGroups_csv(userInfo.getGlobalGroups());
 
-            userRepository.save(user);
+//            userRepository.save(user);
 //            Set<Group> groups = syncGroups(new HashSet<>(userInfo.getGroups()));
             //todo sync if needed
 //            syncUserWithGroups(user, groups);
@@ -62,7 +65,7 @@ public class UserSecurityServiceImpl implements UserSecurityService {
     public UserInfo loggedUser() {
         JwtAuthenticationToken jwtAuthenticationToken = (JwtAuthenticationToken) SecurityContext.authentication();
         KeycloakJwtAttributes jwtAttributes = new KeycloakJwtAttributes(jwtAuthenticationToken, PRINCIPAL_ATTRIBUTE);
-        UserEntity userDb = findByEmail(jwtAttributes.username());
+        ProfileEntity userDb = findProfileByEmail(jwtAttributes.username());
         return UserInfo.from(userDb);
     }
 
@@ -74,6 +77,10 @@ public class UserSecurityServiceImpl implements UserSecurityService {
 
     private UserEntity findByEmail(@NonNull String email) {
         return userRepository.findByEmail(email);
+    }
+
+    private ProfileEntity findProfileByEmail(@NonNull String email) {
+        return profileRepository.findByUserEmail(email);
     }
 
 //    private Set<Group> syncGroups(@NonNull Set<String> groups) {

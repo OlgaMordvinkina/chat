@@ -1,18 +1,14 @@
 package org.mediagate.core.controllers;
 
-import org.mediagate.core.dto.UserDto;
-import org.mediagate.core.dto.UserFullDto;
-import org.mediagate.core.dto.UserRegisterDto;
-import org.mediagate.core.services.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.mediagate.core.dto.UserDto;
+import org.mediagate.core.dto.UserFullDto;
+import org.mediagate.core.dto.UserRegisterDto;
+import org.mediagate.core.services.UserService;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.web.authentication.logout.CookieClearingLogoutHandler;
-import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
-import org.springframework.security.web.authentication.rememberme.AbstractRememberMeServices;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,21 +28,14 @@ public class UserController {
     @PostMapping("/login")
     public Object apiLogin(Principal user) {
         log.info("Login user");
-        UsernamePasswordAuthenticationToken token = ((UsernamePasswordAuthenticationToken) user);
-        return token.getPrincipal();
+        return null;
     }
 
     @PostMapping("/logout")
     @ResponseBody
     public Principal logout(Principal user, HttpServletRequest request, HttpServletResponse response) {
-        CookieClearingLogoutHandler cookieClearingLogoutHandler = new CookieClearingLogoutHandler(
-                AbstractRememberMeServices.SPRING_SECURITY_REMEMBER_ME_COOKIE_KEY
-        );
-        SecurityContextLogoutHandler securityContextLogoutHandler = new SecurityContextLogoutHandler();
-        cookieClearingLogoutHandler.logout(request, response, null);
-        securityContextLogoutHandler.logout(request, response, null);
-
-        return user;
+        log.info("Logout user");
+        return null;
     }
 
     @ResponseStatus(HttpStatus.CREATED)

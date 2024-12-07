@@ -1,10 +1,11 @@
 package org.mediagate.auth.model;
 
-import org.mediagate.db.model.entities.UserEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.mediagate.db.model.entities.ProfileEntity;
+import org.mediagate.db.model.entities.UserEntity;
 
 import java.util.List;
 import java.util.Objects;
@@ -22,16 +23,15 @@ public class UserInfo {
     private String lastName;
     private String email;
     private List<String> groups;
-    /** Роли пользователя в формате ":user:pm:admin:" */
-    private String globalRoles;
-    /** Группы пользователя в формате ":user:pm:admin:" */
-    private String globalGroups;
+    private List<String> globalRoles;
+    private List<String> globalGroups;
 
-    public static UserInfo from(UserEntity user) {
+    public static UserInfo from(ProfileEntity profile) {
+        UserEntity user = profile.getUser();
         return Objects.isNull(user) ? null : UserInfo.builder()
                 .id(user.getId())
-//                .firstName(user.getFirstName())
-//                .lastName(user.getLastName())
+                .firstName(profile.getName())
+                .lastName(profile.getSurname())
                 .email(user.getEmail())
                 .build();
     }

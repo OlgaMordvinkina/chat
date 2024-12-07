@@ -93,9 +93,9 @@ public class KeycloakServiceImpl implements KeycloakService {
                         .firstName(u.getFirstName())
                         .lastName(u.getLastName())
                         .email(u.getUsername()) // В БД мы сохраняем username, поэтому тут берём не email
-                        .groups(u.getGroups() != null ? u.getGroups() : List.of())
-                        .globalGroups(this.getUserGroups(user.getId()))
-                        .globalRoles(this.getUserRoles(user.getId()))
+//                        .groups(u.getGroups() != null ? u.getGroups() : List.of())
+//                        .globalGroups(this.getUserGroups(user.getId()))
+//                        .globalRoles(this.getUserRoles(user.getId()))
                         .build())
                 .orElse(null);
     }
@@ -106,11 +106,11 @@ public class KeycloakServiceImpl implements KeycloakService {
      * @param keycloakUserId Идентификатор пользователя из Keycloak.
      */
     @Override
-    public String getUserRoles(String keycloakUserId) {
+    public List<String> getUserRoles(String keycloakUserId) {
         if (keycloakUserId == null) {
             return null;
         }
-        String roles = keycloak.realm(realm)
+        List<String> roles = keycloak.realm(realm)
                 .users()
                 .get(keycloakUserId)
                 .roles()
@@ -118,8 +118,10 @@ public class KeycloakServiceImpl implements KeycloakService {
                 .getRealmMappings()
                 .stream()
                 .map(RoleRepresentation::getName)
-                .collect(Collectors.joining(":"));
-        return roles.isEmpty() ? null : ":" + roles + ":";
+                .collect(Collectors.toList());
+//                .collect(Collectors.joining(":"));
+//        return roles.isEmpty() ? null : ":" + roles + ":";
+        return roles;
     }
 
     /** При выгрузке пользователей из Keycloak не выгружаются его группы и роли.
@@ -128,18 +130,20 @@ public class KeycloakServiceImpl implements KeycloakService {
       @param keycloakUserId Идентификатор пользователя из Keycloak.
      */
     @Override
-    public String getUserGroups(String keycloakUserId) {
+    public List<String> getUserGroups(String keycloakUserId) {
         if (keycloakUserId == null) {
             return null;
         }
-        String groups = keycloak.realm(realm)
+        List<String> groups = keycloak.realm(realm)
                 .users()
                 .get(keycloakUserId)
                 .groups()
                 .stream()
                 .map(GroupRepresentation::getName)
-                .collect(Collectors.joining(":"));
-        return groups.isEmpty() ? null : ":" + groups + ":";
+                .collect(Collectors.toList());
+//                .collect(Collectors.joining(":"));
+//        return groups.isEmpty() ? null : ":" + groups + ":";
+        return groups;
     }
 
 }
