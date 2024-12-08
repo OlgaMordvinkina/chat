@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.keycloak.OAuth2Constants;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
-import org.mediagate.auth.service.UserSecurityService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -30,8 +29,6 @@ public class SecurityConfig {
 	@Value("${security.swagger.kc_admin.password}")
 	private String password;
 
-    private final UserSecurityService userDataService;
-
 	/**
 	 * 	статические ресурсы размещены в /src/main/webapp/
      */
@@ -43,8 +40,10 @@ public class SecurityConfig {
 						.requestMatchers("/v3/api-docs/**",
 								"/swagger-ui.html",
 								"/swagger-ui/**",
-								"/login/**",
+								"/login",
+								"/api/login",
 								"/registration",
+								"/api/registration",
 								"/").permitAll()
 						.anyRequest().authenticated())
                 .oauth2ResourceServer((oauth2) -> oauth2

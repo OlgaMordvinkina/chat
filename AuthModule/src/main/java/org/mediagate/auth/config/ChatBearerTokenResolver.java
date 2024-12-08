@@ -14,7 +14,7 @@ import org.springframework.util.StringUtils;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/** Resolve any Bearer Token value from the request. */
+/** Извлечь любое значение Bearer токена из запроса. */
 @Builder
 public final class ChatBearerTokenResolver implements BearerTokenResolver {
     private static final String ACCESS_TOKEN_PARAMETER_NAME = "access_token";
@@ -55,14 +55,6 @@ public final class ChatBearerTokenResolver implements BearerTokenResolver {
         return (request.getQueryString() != null) && request.getQueryString().contains(ACCESS_TOKEN_PARAMETER_NAME);
     }
 
-    /**
-     * Определите маркер доступа из запроса.
-     * Если access_token и заголовок авторизации совпадают, верните заголовок авторизации.
-     *
-     * @param request the request
-     * @return token value
-     * @throws OAuth2AuthenticationException – if the found token is invalid
-     */
     @Override
     public String resolve(final HttpServletRequest request) {
         final String authorizationHeaderToken = resolveFromAuthorizationHeader(request);

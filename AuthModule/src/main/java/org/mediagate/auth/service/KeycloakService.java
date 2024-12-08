@@ -9,6 +9,8 @@ import java.util.List;
 public interface KeycloakService {
     String syncUsersWithKeycloak();
 
+    UserRepresentation getUserByEmail(String email);
+
     List<UserRepresentation> getAllUsersFromKeycloak();
 
     List<RoleRepresentation> getAllRolesFromKeycloak();

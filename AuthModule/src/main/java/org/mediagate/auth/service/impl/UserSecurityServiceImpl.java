@@ -1,60 +1,60 @@
 package org.mediagate.auth.service.impl;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.keycloak.representations.idm.UserRepresentation;
 import org.mediagate.auth.config.KeycloakJwtAttributes;
 import org.mediagate.auth.context.SecurityContext;
 import org.mediagate.auth.exceptions.AccessControlException;
 import org.mediagate.auth.exceptions.AccessControlExceptionCode;
 import org.mediagate.auth.model.UserInfo;
 import org.mediagate.auth.service.UserSecurityService;
+import org.mediagate.auth.service.UserServiceAuth;
 import org.mediagate.auth.util.KeycloakJwtAttributeName;
 import org.mediagate.db.model.entities.ProfileEntity;
 import org.mediagate.db.model.entities.UserEntity;
 import org.mediagate.db.repositories.ProfileRepository;
 import org.mediagate.db.repositories.UserRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.lang.NonNull;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.Objects;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class UserSecurityServiceImpl implements UserSecurityService {
+    @Value("${security.principal_attribute}")
+    private KeycloakJwtAttributeName PRINCIPAL_ATTRIBUTE;
 
     private final UserRepository userRepository;
     private final ProfileRepository profileRepository;
 
-//    private final IGroupDataService groupDataService;
-
-    @Value("${security.principal_attribute}")
-    private KeycloakJwtAttributeName PRINCIPAL_ATTRIBUTE;
+    private final UserServiceAuth userService;
 
     @Transactional
     public void syncUser(UserInfo userInfo) {
+//      todo: синхронизируем только если юзер уже создан в кейклоке или в бд
         try {
             UserEntity user;
             if (Objects.isNull(userInfo)) {
                 throw new AccessControlException(AccessControlExceptionCode.USER_NOT_AUTHENTICATED, "User is null");
             }
+
+            UserRepresentation userFromKK = userService.getUserByEmailFromKeycloak(userInfo.getEmail());
             user = findByEmail(userInfo.getEmail());
+            // Если в кк существует, а в бд нет, то надо создать в бд
+            if (Objects.nonNull(userFromKK) && Objects.isNull(user)) {
+                userService.createUserInDB(userFromKK);
+            }
+
             if (Objects.isNull(user)) {
                 user = new UserEntity();
             }
-//            user.setFirstName(userInfo.getFirstName());
-//            user.setLastName(userInfo.getLastName());
             user.setEmail(userInfo.getEmail());
-//            user.setGlobalRoles_csv(userInfo.getGlobalRoles());
-//            user.setGlobalGroups_csv(userInfo.getGlobalGroups());
-
-//            userRepository.save(user);
-//            Set<Group> groups = syncGroups(new HashSet<>(userInfo.getGroups()));
-            //todo sync if needed
-//            syncUserWithGroups(user, groups);
             log.debug("Синхронизация данных пользователя {id: {}, email: {}} с Keycloak прошла успешно", user.getId(), userInfo.getEmail());
         } catch (Exception exception) {
             log.error("Ошибка при синхронизации данных пользователя и групп Keycloak с БД", exception);
@@ -83,41 +83,4 @@ public class UserSecurityServiceImpl implements UserSecurityService {
         return profileRepository.findByUserEmail(email);
     }
 
-//    private Set<Group> syncGroups(@NonNull Set<String> groups) {
-//        Filter groupFilter = Group.createFilter()
-//                .in(Group.Fields.name, groups)
-//                .build();
-//        Set<Group> groupEntities = new HashSet<>(groupDataService.findAllByFilter(groupFilter));
-//        Set<Group> createdGroups = createNotExistingGroups(groupEntities, groups);
-//        if (createdGroups.isEmpty()) {
-//            return groupEntities;
-//        }
-//        createdGroups.addAll(groupEntities);
-//        return createdGroups;
-//    }
-
-//    private Set<Group> createNotExistingGroups(@NonNull Set<Group> groupsDb, @NonNull Set<String> groupsKc) {
-//        Predicate<String> predicate = group -> {
-//            for (Group g : groupsDb) {
-//                if (group.equals(g.getName())) {
-//                    return false;
-//                }
-//            }
-//            return true;
-//        };
-//        List<String> notExistingGroups = groupsKc.stream().filter(predicate).toList();
-//
-//        List<Group> groupsToCreate = new ArrayList<>();
-//        for (String notExistingGroup : notExistingGroups) {
-//            Group group = new Group();
-//            group.setName(notExistingGroup);
-//            groupsToCreate.add(group);
-//        }
-//        return groupDataService.saveAll(groupsToCreate).stream().map(EntitySaveStatus::getEntity).collect(Collectors.toSet());
-//    }
-//
-//    private void syncUserWithGroups(@NonNull User user, Set<Group> groups) {
-//        user.setGroups(groups);
-//        userRepository.save(user).getEntity();
-//    }
 }

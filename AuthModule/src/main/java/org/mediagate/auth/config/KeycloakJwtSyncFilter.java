@@ -36,7 +36,8 @@ public class KeycloakJwtSyncFilter extends OncePerRequestFilter {
         if (Objects.nonNull(token)) {
             KeycloakJwtAttributes attributes = new KeycloakJwtAttributes(token, PRINCIPAL_ATTRIBUTE);
             UserInfo userInfo = UserInfo.builder()
-                    .email(attributes.email()) //todo email as email - preferredUsername as username
+                    .email(attributes.email())
+                    .username(attributes.username())
                     .firstName(attributes.firstName())
                     .lastName(attributes.lastName())
                     .groups(attributes.groups())

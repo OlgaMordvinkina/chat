@@ -9,6 +9,7 @@ import org.mediagate.core.dto.UserFullDto;
 import org.mediagate.core.dto.UserRegisterDto;
 import org.mediagate.core.services.UserService;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,14 +29,45 @@ public class UserController {
     @PostMapping("/login")
     public Object apiLogin(Principal user) {
         log.info("Login user");
-        return null;
+
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User is not authenticated");
+        }
+
+        // Получаем информацию о пользователе из Principal
+//        if (user instanceof OAuth2AuthenticationToken authToken) {
+//            Map<String, Object> attributes = authToken.getPrincipal().getAttributes();
+//            String username = (String) attributes.get("preferred_username");
+//            String email = (String) attributes.get("email");
+//            String roles = attributes.getOrDefault("roles", "").toString();
+//
+//            log.info("User logged in: username={}, email={}, roles={}", username, email, roles);
+//
+//            // Возвращаем данные пользователя или токен
+//            Map<String, Object> response = new HashMap<>();
+//            response.put("username", username);
+//            response.put("email", email);
+//            response.put("roles", roles);
+//
+//            return ResponseEntity.ok(response);
+//        }
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unsupported authentication type");
+//        UsernamePasswordAuthenticationToken token = ((UsernamePasswordAuthenticationToken) user);
+//        return token.getPrincipal();
     }
 
     @PostMapping("/logout")
     @ResponseBody
     public Principal logout(Principal user, HttpServletRequest request, HttpServletResponse response) {
-        log.info("Logout user");
-        return null;
+//        CookieClearingLogoutHandler cookieClearingLogoutHandler = new CookieClearingLogoutHandler(
+//                AbstractRememberMeServices.SPRING_SECURITY_REMEMBER_ME_COOKIE_KEY
+//        );
+//        SecurityContextLogoutHandler securityContextLogoutHandler = new SecurityContextLogoutHandler();
+//        cookieClearingLogoutHandler.logout(request, response, null);
+//        securityContextLogoutHandler.logout(request, response, null);
+
+        return user;
     }
 
     @ResponseStatus(HttpStatus.CREATED)

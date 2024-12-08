@@ -11,7 +11,6 @@ spring:
   flyway.enabled: true
   security:
     oauth2.resourceserver.jwt.issuer-uri: http://localhost:8686/realms/mediagate
-#    oauth2.resourceserver.jwt.issuer-uri: http://localhost:8686/keycloak/realms/mediagate
 #spring.jpa.hibernate.ddl-auto: validate
 #spring.jpa.hibernate.ddl-auto: create-drop
 
@@ -36,15 +35,11 @@ minio_secret_key: minioadmin
 #postgres.db: ${POSTGRES_DB:chat}
 #postgres.user: ${POSTGRES_USER:postgres}
 #postgres.password: ${POSTGRES_PASSWORD:1234}
-
+spring.security.oauth2.resourceserver.jwt.issuer-uri: http://localhost:8686/realms/mediagate
 security:
-  #claim с идентификатором пользователя, используется для поля email
-  #доступные значения PREFERRED_USERNAME, FIRST_NAME, LAST_NAME, EMAIL, FULL_NAME
   principal_attribute: PREFERRED_USERNAME
-  #конфигурация swagger для keycloak
   swagger:
     kc_url: ${KEYCLOAK_BASE_URL:http://localhost:8686}
-#    realm: ${KEYCLOAK_REALM:master}
     realm: ${KEYCLOAK_REALM:mediagate}
     kc_admin:
       realm: ${KEYCLOAK_ADMIN_REALM:master}

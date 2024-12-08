@@ -15,6 +15,7 @@ import org.mediagate.core.services.ProfileService;
 import org.mediagate.core.services.SettingService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.mediagate.db.repositories.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,6 +28,7 @@ import java.time.format.DateTimeFormatter;
 @RequiredArgsConstructor
 public class ProfileServiceImpl implements ProfileService {
     private final ProfileRepository profileRepository;
+    private final UserRepository userRepository;
     private final ProfileMapper profileMapper;
     private final SettingMapper settingMapper;
     private final SettingService settingService;
@@ -94,6 +96,10 @@ public class ProfileServiceImpl implements ProfileService {
         ProfileEntity profile = profileRepository.findByUserEmail(email);
         if (profile == null) {
             throw new NotFoundObjectException("Profile with EMAIL=" + email + " does not exist.");
+        }
+        // todo: костыль
+        if (profile.getUser() == null) {
+            profile.setUser(userRepository.findByEmail(email));
         }
         return profile;
     }

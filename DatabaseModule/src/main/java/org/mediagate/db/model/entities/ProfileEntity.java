@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "Profiles")
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE)
-public class ProfileEntity extends ABaseEntity {
+public class ProfileEntity {
     @Id
 //    @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;

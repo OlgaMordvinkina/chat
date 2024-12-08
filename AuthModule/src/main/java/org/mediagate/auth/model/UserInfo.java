@@ -22,6 +22,7 @@ public class UserInfo {
     private String firstName;
     private String lastName;
     private String email;
+    private String username;
     private List<String> groups;
     private List<String> globalRoles;
     private List<String> globalGroups;

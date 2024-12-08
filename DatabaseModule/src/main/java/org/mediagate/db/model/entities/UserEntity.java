@@ -9,9 +9,9 @@ import lombok.experimental.FieldDefaults;
 @Getter
 @Setter
 @ToString
-//@SuperBuilder
+@SuperBuilder
 @NoArgsConstructor
-@AllArgsConstructor
+//@AllArgsConstructor
 @Entity
 @Table(name = "Users")
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE)
@@ -27,4 +27,11 @@ public class UserEntity extends ABaseEntity {
     @Column(name = "user_role")
     @Enumerated(value = EnumType.STRING)
     Role role;
+
+    public UserEntity(Long id, String email, PasswordEntity password, Role role) {
+        super(id);
+        this.email = email;
+        this.password = password;
+        this.role = role;
+    }
 }
