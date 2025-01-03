@@ -71,6 +71,10 @@ public class ProfileServiceImpl implements ProfileService {
     @Override
     public ProfileDto updateOnlineDate(Long userId) {
         ProfileEntity profile = findProfileByUserId(userId);
+        // todo: костыль
+        if (profile.getUser() == null) {
+            profile.setUser(userRepository.findById(userId).get());
+        }
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         profile.setOnlineDate(LocalDateTime.parse(LocalDateTime.now().format(formatter), formatter));
         ProfileDto profileDto = profileMapper.toProfileDto(profileRepository.save(profile));

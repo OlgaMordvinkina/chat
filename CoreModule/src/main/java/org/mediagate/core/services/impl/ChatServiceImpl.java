@@ -1,9 +1,11 @@
 package org.mediagate.core.services.impl;
 
+import org.mediagate.auth.service.KeycloakService;
 import org.mediagate.core.dto.AttachmentDto;
 import org.mediagate.core.dto.ChatDto;
 import org.mediagate.core.dto.ChatFullDto;
 import org.mediagate.core.dto.UserFullDto;
+import org.mediagate.auth.model.Groups;
 import org.mediagate.core.dto.enums.TypeBucket;
 import org.mediagate.core.exceptions.AccessException;
 import org.mediagate.db.exceptions.NotFoundObjectException;
@@ -20,6 +22,7 @@ import org.mediagate.db.enums.StateMessage;
 import org.mediagate.db.enums.TypeParticipant;
 import org.mediagate.db.model.ChatPreviewDto;
 import lombok.RequiredArgsConstructor;
+import org.mediagate.db.model.entities.UserEntity;
 import org.mediagate.db.repositories.*;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -42,6 +45,7 @@ public class ChatServiceImpl implements ChatService {
     private final ParticipantRepository participantRepository;
     private final ChatMapper chatMapper;
     private final MinioService minioService;
+    private final KeycloakService keycloakService;
 
     /**
      * Если чат PRIVATE и он уже есть, то возвращается он, а если нет, то создаётся новый
@@ -124,12 +128,13 @@ public class ChatServiceImpl implements ChatService {
 
             String photo = preview.getPhoto();
             if (photo != null) {
-                Long companionId = preview.getCompanionId();
-                preview.setPhoto(
-                        companionId != null ?
-                                getUrlFiles(companionId, photo, TypeBucket.user.name()) :
-                                getUrlFiles(preview.getChatId(), photo, TypeBucket.chat.name())
-                );
+                preview.setPhoto(null);
+//                Long companionId = preview.getCompanionId();
+//                preview.setPhoto(
+//                        companionId != null ?
+//                                getUrlFiles(companionId, photo, TypeBucket.user.name()) :
+//                                getUrlFiles(preview.getChatId(), photo, TypeBucket.chat.name())
+//                );
             }
 
             Long senderId = preview.getSenderId();
@@ -145,37 +150,47 @@ public class ChatServiceImpl implements ChatService {
 
     @Override
     public ChatFullDto getChat(Long userId, Long chatId) {
-        userService.existUserById(userId);
+//        userService.existUserById(userId);
+        UserEntity user = userRepository.findUserById(userId);
         ChatEntity chat = chatRepository.getChatByIdAndUserId(chatId, userId);
 
         if (chat == null) {
-            throw new AccessException("No rights to this chat");
+            throw new AccessException("Нет прав на этот чат");
         }
+        List<String> groups = keycloakService.getUserByEmail(user.getEmail()).getGroups();
+        if (groups == null || groups.stream().noneMatch(group -> group.equals(Groups.group_chats.name()))) {
+            throw new AccessException("У пользователя отсутствует доступ к групповым чатам");
+        }
+
         ChatFullDto chatFull = chatMapper.toChatFullDto(chat);
         if (chatFull.getType().equals(Availability.PRIVATE)) {
             Optional<String> fullName = chatFull.getParticipants().stream()
-                    .filter(user -> !Objects.equals(user.getId(), userId))
+                    .filter(userFullDto -> !Objects.equals(userFullDto.getId(), userId))
                     .map(UserFullDto::getFullName)
                     .findFirst();
             chatFull.setTitle(fullName.orElse(null));
         }
 
         List<UserFullDto> participants = chatFull.getParticipants().stream()
-                .peek(user -> chat.getParticipants().stream()
-                        .filter(it -> Objects.equals(it.getKey().getUser().getId(), user.getId()))
+                .peek(userFullDto -> chat.getParticipants().stream()
+                        .filter(it -> Objects.equals(it.getKey().getUser().getId(), userFullDto.getId()))
                         .findFirst()
                         .ifPresent(participant -> {
                             String photo = participant.getKey().getUser().getPhoto();
                             if (photo != null) {
-                                String fileBase64 = getUrlFiles(user.getId(), photo, TypeBucket.user.name());
-                                user.setPhoto(fileBase64);
+                                // todo костыль
+                                userFullDto.setPhoto(null);
+//                                String fileBase64 = getUrlFiles(user.getId(), photo, TypeBucket.user.name());
+//                                user.setPhoto(fileBase64);
                             }
                         }))
                 .collect(Collectors.toList());
         chatFull.setParticipants(participants);
 
         if (chat.getPhoto() != null) {
-            chatFull.setPhoto(getUrlFiles(chatId, chat.getPhoto(), TypeBucket.chat.name()));
+            // todo костыль
+            chatFull.setPhoto(null);
+//            chatFull.setPhoto(getUrlFiles(chatId, chat.getPhoto(), TypeBucket.chat.name()));
         }
         return chatFull;
     }

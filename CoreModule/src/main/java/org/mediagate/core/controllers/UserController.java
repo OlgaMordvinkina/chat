@@ -73,33 +73,33 @@ public class UserController {
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/registration")
     public UserDto createUser(@RequestBody UserRegisterDto newUser) {
-        log.info("POST /users/registration request received");
+        log.info("POST /users/registration получен запрос");
         return service.createUser(newUser);
     }
 
     @PutMapping("/users/{userId}")
     public UserDto updateUser(@PathVariable Long userId,
                               @RequestBody UserRegisterDto updateUser) {
-        log.info("PUT /users/registration/" + userId + " request received");
+        log.info("PUT /users/registration/" + userId + " получен запрос");
         return service.updateUser(userId, updateUser);
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/users/{userId}")
     public void deleteUser(@PathVariable Long userId, Long deletedUserId) {
-        log.info("DELETE /users/registration/" + userId + " request received");
+        log.info("DELETE /users/registration/" + userId + " получен запрос");
         service.deleteUserById(userId, deletedUserId);
     }
 
     @GetMapping("/users/{userId}/search")
     public List<UserFullDto> searchUser(@PathVariable Long userId, @Valid @NotBlank @RequestParam String desired) {
-        log.info("GET /users/" + userId + "/search request received");
+        log.info("GET /users/" + userId + "/search получен запрос на поиск пользователя");
         return service.searchUser(userId, desired);
     }
 
     @GetMapping("/users")
     public UserFullDto getUser(@RequestParam String email) {
-        log.info("GET /users search request received");
+        log.info("GET /users search получен запрос");
         return service.getUser(email);
     }
 }

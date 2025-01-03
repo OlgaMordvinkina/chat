@@ -36,7 +36,7 @@ public class MessageController {
                                     @PathVariable Long chatId,
                                     @RequestBody MessageDto newMessage) {
         String.format("");
-        log.info("POST /users/" + userId + "/chats/" + chatId + "/messages request received");
+        log.info("POST /users/" + userId + "/chats/" + chatId + "/messages получен запрос");
         MessageDto createdMessage = service.createMessage(userId, chatId, newMessage);
 
         sendToWebsocket(createdMessage, "CREATE");
@@ -48,7 +48,7 @@ public class MessageController {
     public MessageDto updateMessage(@PathVariable Long userId,
                                     @PathVariable Long chatId,
                                     @RequestBody MessageDto newMessage) {
-        log.info("PUT /users/" + userId + "/chats/" + chatId + "/messages request received");
+        log.info("PUT /users/" + userId + "/chats/" + chatId + "/messages получен запрос");
         ProfileDto profileDto = new ProfileDto();
         profileDto.setUserId(userId);
         newMessage.setSender(profileDto);
@@ -64,7 +64,7 @@ public class MessageController {
     @PutMapping("/{chatId}/messages/state")
     public void updateStateMessage(@PathVariable Long userId,
                                    @PathVariable Long chatId) {
-        log.info("PUT /users/" + userId + "/chats/" + chatId + "/messages/state request received");
+        log.info("PUT /users/" + userId + "/chats/" + chatId + "/messages/state получен запрос");
 
         service.updateStateMessages(userId, chatId);
         sendToWebsocket(chatId);
@@ -75,7 +75,7 @@ public class MessageController {
     public void deleteMessage(@PathVariable Long userId,
                               @PathVariable Long chatId,
                               @PathVariable Long messageId) {
-        log.info("DELETE /users/" + userId + "/chats/" + chatId + "/messages/" + messageId + " request received");
+        log.info("DELETE /users/" + userId + "/chats/" + chatId + "/messages/" + messageId + " получен запрос");
         MessageDto message = service.deleteMessage(userId, chatId, messageId);
         sendToWebsocket(message, "DELETE");
     }
@@ -85,7 +85,7 @@ public class MessageController {
                                         @PathVariable Long chatId,
                                         @RequestParam(defaultValue = "1") @Positive int page,
                                         @RequestParam(defaultValue = "15") @Positive int size) {
-        log.info("GET /users/" + userId + "/chats/" + chatId + "/messages?page=" + page + "?size=" + size + " request received");
+        log.info("GET /users/" + userId + "/chats/" + chatId + "/messages?page=" + page + "?size=" + size + " получен запрос");
         return service.getMessages(userId, chatId, page, size);
     }
 
@@ -97,7 +97,7 @@ public class MessageController {
                                             @NotBlank
                                             @Pattern(regexp = "^\\S*$")
                                             @RequestParam String desired) throws IllegalAccessException {
-        log.debug("GET /users/" + userId + "/chats/messages/search?desired= " + desired + " request received");
+        log.debug("GET /users/" + userId + "/chats/messages/search?desired= " + desired + " получен запрос");
         return service.searchMessagesChats(userId, null, desired, TypeSearch.ALL_CHATS);
     }
 
@@ -110,7 +110,7 @@ public class MessageController {
                                             @NotBlank
                                             @Pattern(regexp = "^\\S*$")
                                             @RequestParam String desired) throws IllegalAccessException {
-        log.debug("GET /users/" + userId + "/chats/" + chatId + "/messages/search?desired=" + desired + " request received");
+        log.debug("GET /users/" + userId + "/chats/" + chatId + "/messages/search?desired=" + desired + " получен запрос");
         return service.searchMessagesChats(userId, chatId, desired, TypeSearch.THIS_CHAT);
     }
 

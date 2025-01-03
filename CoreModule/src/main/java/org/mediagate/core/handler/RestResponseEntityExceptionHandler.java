@@ -3,6 +3,7 @@ package org.mediagate.core.handler;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.mediagate.core.exceptions.AccessException;
 import org.mediagate.db.exceptions.EmailUniqueException;
 import org.mediagate.db.exceptions.NotFoundObjectException;
@@ -16,6 +17,7 @@ import org.springframework.security.core.AuthenticationException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+@Slf4j
 @RestControllerAdvice
 @RequiredArgsConstructor
 public class RestResponseEntityExceptionHandler {
@@ -46,13 +48,14 @@ public class RestResponseEntityExceptionHandler {
         return getResponseEntity(HttpStatus.UNAUTHORIZED, response);
     }
 
-    @ExceptionHandler(RuntimeException.class)
-    protected ResponseEntity<Object> handleConflict(RuntimeException ex) throws JsonProcessingException {
-        ApiError response = getResponse(HttpStatus.UNAUTHORIZED, "Неизвестная ошибка.", ex.getMessage());
-        return getResponseEntity(HttpStatus.UNAUTHORIZED, response);
-    }
+//    @ExceptionHandler(RuntimeException.class)
+//    protected ResponseEntity<Object> handleConflict(RuntimeException ex) throws JsonProcessingException {
+//        ApiError response = getResponse(HttpStatus.UNAUTHORIZED, "Неизвестная ошибка.", ex.getMessage());
+//        return getResponseEntity(HttpStatus.UNAUTHORIZED, response);
+//    }
 
     private ApiError getResponse(HttpStatus notFound, String reason, String message) {
+        log.error("{} | {} | {}", notFound.value(), reason, message);
         return ApiError.builder()
                 .status(notFound.name())
                 .reason(reason)

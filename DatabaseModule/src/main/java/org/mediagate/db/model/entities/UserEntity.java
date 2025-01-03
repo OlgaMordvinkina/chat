@@ -11,14 +11,14 @@ import lombok.experimental.FieldDefaults;
 @ToString
 @SuperBuilder
 @NoArgsConstructor
-//@AllArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "Users")
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE)
-public class UserEntity extends ABaseEntity {
-//    @Id
-//    @GeneratedValue(strategy = GenerationType.IDENTITY)
-//    Long id;
+public class UserEntity {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    Long id;
     @Column(unique = true)
     String email;
     @OneToOne(cascade = CascadeType.ALL)
@@ -28,10 +28,10 @@ public class UserEntity extends ABaseEntity {
     @Enumerated(value = EnumType.STRING)
     Role role;
 
-    public UserEntity(Long id, String email, PasswordEntity password, Role role) {
-        super(id);
-        this.email = email;
-        this.password = password;
-        this.role = role;
-    }
+//    public UserEntity(Long id, String email, PasswordEntity password, Role role) {
+//        super(id);
+//        this.email = email;
+//        this.password = password;
+//        this.role = role;
+//    }
 }

@@ -8,6 +8,7 @@ import org.mediagate.core.services.ChatService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.constraints.Positive;
@@ -24,7 +25,7 @@ public class ChatController {
     @PostMapping
     public ChatDto createChat(@PathVariable Long userId,
                               @RequestBody ChatDto newChat) {
-        log.debug("POST /users/" + userId + "/chats request received");
+        log.debug("POST /users/" + userId + "/chats получен запрос");
         return service.createChat(userId, newChat);
     }
 
@@ -32,20 +33,21 @@ public class ChatController {
     @DeleteMapping("/{chatId}")
     public void deleteChat(@PathVariable Long userId,
                            @PathVariable Long chatId) {
-        log.debug("DELETE /users/" + userId + "/chats/" + chatId + " request received");
+        log.debug("DELETE /users/" + userId + "/chats/" + chatId + " получен запрос");
         service.deleteChat(userId, chatId);
     }
 
     @GetMapping("/previews")
     public List<ChatPreviewDto> getChatPreviews(@PathVariable Long userId) {
-        log.debug("GET /users/" + userId + "/chats/previews request received");
+        log.debug("GET /users/" + userId + "/chats/previews получен запрос");
         return service.getChatPreviews(userId);
     }
 
+    @PreAuthorize("hasRole('GROUP_CHAT_ACCESS')")
     @GetMapping("/{chatId}")
     public ChatFullDto getChat(@PathVariable Long userId,
                                @PathVariable Long chatId) {
-        log.debug("GET /users/" + userId + "/chats/" + chatId + " request received");
+        log.debug("GET /users/" + userId + "/chats/" + chatId + " получен запрос");
         return service.getChat(userId, chatId);
     }
 
@@ -54,7 +56,7 @@ public class ChatController {
                                                   @PathVariable Long chatId,
                                                   @RequestParam(defaultValue = "1") @Positive int page,
                                                   @RequestParam(defaultValue = "12") @Positive int size) {
-        log.info("GET /users/" + userId + "/chats/" + chatId + "attachments?page=" + page + "?size=" + size + " request received");
+        log.info("GET /users/" + userId + "/chats/" + chatId + "attachments?page=" + page + "?size=" + size + " получен запрос");
         return service.getAttachmentsChat(userId, chatId, page, size);
     }
 
@@ -62,7 +64,7 @@ public class ChatController {
     public ChatDto updatePhotoChat(@PathVariable Long userId,
                                    @PathVariable Long chatId,
                                    @RequestBody String photo) {
-        log.debug("PUT /users/" + userId + "/chats/" + chatId + " request received");
+        log.debug("PUT /users/" + userId + "/chats/" + chatId + " получен запрос");
         return service.updatePhotoChat(userId, chatId, photo);
     }
 }

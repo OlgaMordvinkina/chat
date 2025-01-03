@@ -55,6 +55,14 @@ public final class ChatBearerTokenResolver implements BearerTokenResolver {
         return (request.getQueryString() != null) && request.getQueryString().contains(ACCESS_TOKEN_PARAMETER_NAME);
     }
 
+    /**
+     * Определите маркер доступа из запроса.
+     * Если access_token и заголовок авторизации совпадают, верните заголовок авторизации.
+     *
+     * @param request the request
+     * @return token value
+     * @throws OAuth2AuthenticationException – if the found token is invalid
+     */
     @Override
     public String resolve(final HttpServletRequest request) {
         final String authorizationHeaderToken = resolveFromAuthorizationHeader(request);

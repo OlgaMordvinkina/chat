@@ -19,19 +19,19 @@ public class ProfilesController {
     @PutMapping("/{userId}/profile")
     public ProfileDto updateProfile(@PathVariable Long userId,
                                     @RequestBody UserRegisterDto updateUser) {
-        log.info("PUT /user/" + userId + "/profile request received");
+        log.info("PUT /user/" + userId + "/profile получен запрос");
         return service.updateProfile(userId, updateUser);
     }
 
     @GetMapping("/{userId}/profile")
     public ProfileDto getProfile(@PathVariable Long userId) {
-        log.info("GET /user/" + userId + "/profile request received");
+        log.info("GET /user/" + userId + "/profile получен запрос");
         return service.getProfileByUserId(userId);
     }
 
     @PutMapping("/{userId}/profile/online")
     public ProfileDto updateOnlineDate(@PathVariable Long userId) {
-        log.info("PUT /user/" + userId + "/profile request received");
+        log.info("PUT /user/" + userId + "/profile получен запрос");
         return service.updateOnlineDate(userId);
     }
 }

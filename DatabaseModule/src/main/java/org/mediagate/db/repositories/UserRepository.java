@@ -8,11 +8,15 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 @Repository
 public interface UserRepository extends JpaRepository<UserEntity, Long> {
     List<UserEntity> findAllByIdIn(Set<Long> ids);
+
+    @Query("SELECT u FROM UserEntity u WHERE u.id = :id")
+    UserEntity findUserById(@Param("id") Long id);
 
     @Query("SELECT EXISTS(SELECT 1 FROM UserEntity WHERE email = :email)")
     boolean existByEmail(@Param("email") String email);

@@ -51,6 +51,8 @@ dependencies {
 	testImplementation 'org.projectlombok:lombok'
 	implementation 'commons-codec:commons-codec:1.15'
 	implementation 'commons-io:commons-io:2.11.0'
+
+	implementation 'org.keycloak:keycloak-admin-client:25.0.0'
 }
 
 tasks.named('test') {

@@ -36,6 +36,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		http.anonymous(AbstractHttpConfigurer::disable)
 				.authorizeHttpRequests((request) -> request
+						.requestMatchers("/api/users/*/chats/*").hasRole("GROUP_CHAT_ACCESS")
 						.requestMatchers(".*", "/web/.*").denyAll()
 						.requestMatchers("/v3/api-docs/**",
 								"/swagger-ui.html",

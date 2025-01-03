@@ -122,7 +122,9 @@ public class MessageServiceImpl implements MessageService {
         Pageable pages = PageRequest.of(pageNumber, size, Sort.by(Sort.Direction.DESC, "id"));
         List<MessageDto> messages = toListMessageDto(chatId, messageRepository.findAllByChat_Id(chatId, pages));
         messages.forEach(message -> {
-            String photo = message.getSender().getPhoto();
+//            String photo = message.getSender().getPhoto();
+            //todo костыль
+            String photo = null;
             message.getSender().setPhoto(photo != null ? minioService.getUrlFiles(TypeBucket.user.name() + message.getSender().getId(), photo) : null);
         });
         return messages;
@@ -198,10 +200,11 @@ public class MessageServiceImpl implements MessageService {
 
         msg.forEach(message -> {
                     List<AttachmentDto> attachments = new ArrayList<>();
-                    message.getAttachments().forEach(attachment -> {
-                        String fileBase64 = minioService.getUrlFiles(TypeBucket.attachmentschat.name() + chatId, attachment.getFile());
-                        attachments.add(new AttachmentDto(attachment.getId(), fileBase64));
-                    });
+                    // todo костыль
+//                    message.getAttachments().forEach(attachment -> {
+//                        String fileBase64 = minioService.getUrlFiles(TypeBucket.attachmentschat.name() + chatId, attachment.getFile());
+//                        attachments.add(new AttachmentDto(attachment.getId(), fileBase64));
+//                    });
 
                     message.setAttachments(attachments);
                 }
